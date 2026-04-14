@@ -765,125 +765,15 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.closePath();
 }
 
-canvas.addEventListener('touchstart', (e) => {
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
-  handleClick(x, y);
-});
-
-function handleClick(x, y) {
-  if (gameState.showStartScreen) {
-    if (gameState.startBtn &&
-        x >= gameState.startBtn.x && x <= gameState.startBtn.x + gameState.startBtn.width &&
-        y >= gameState.startBtn.y && y <= gameState.startBtn.y + gameState.startBtn.height) {
-      startGame(1);
-    }
-    return;
-  }
-
-  if (gameState.pauseBtn &&
-      x >= gameState.pauseBtn.x && x <= gameState.pauseBtn.x + gameState.pauseBtn.width &&
-      y >= gameState.pauseBtn.y && y <= gameState.pauseBtn.y + gameState.pauseBtn.height) {
-    if (!gameState.showLoseModal && !gameState.showWinModal) {
-      gameState.gamePaused = !gameState.gamePaused;
-      render();
-    }
-    return;
-  }
-
-  if (gameState.gamePaused && gameState.pauseContinueBtn) {
-    if (x >= gameState.pauseContinueBtn.x && x <= gameState.pauseContinueBtn.x + gameState.pauseContinueBtn.width &&
-        y >= gameState.pauseContinueBtn.y && y <= gameState.pauseContinueBtn.y + gameState.pauseContinueBtn.height) {
-      gameState.gamePaused = false;
-      render();
-      return;
-    }
-  }
-
-  if (gameState.showLoseModal) {
-    if (gameState.loseRestartBtn &&
-        x >= gameState.loseRestartBtn.x && x <= gameState.loseRestartBtn.x + gameState.loseRestartBtn.width &&
-        y >= gameState.loseRestartBtn.y && y <= gameState.loseRestartBtn.y + gameState.loseRestartBtn.height) {
-      handleLoseConfirm();
-      return;
-    }
-    if (gameState.loseShareBtn) {
-      if (x >= gameState.loseShareBtn.x && x <= gameState.loseShareBtn.x + gameState.loseShareBtn.width &&
-          y >= gameState.loseShareBtn.y && y <= gameState.loseShareBtn.y + gameState.loseShareBtn.height) {
-        wx.showShareMenu({ withShareTicket: true });
-        try {
-          wx.setStorageSync(SHARE_KEY, Date.now());
-          gameState.hasShared = true;
-          render();
-        } catch (e) {
-          console.error('保存分享状态失败:', e);
-        }
-        return;
-      }
-    }
-    if (gameState.loseHomeBtn &&
-        x >= gameState.loseHomeBtn.x && x <= gameState.loseHomeBtn.x + gameState.loseHomeBtn.width &&
-        y >= gameState.loseHomeBtn.y && y <= gameState.loseHomeBtn.y + gameState.loseHomeBtn.height) {
-      if (gameState.timer) clearInterval(gameState.timer);
-      initGame(gameState.currentLevel);
-      return;
-    }
-    return;
-  }
-
-  if (gameState.showWinModal) {
-    if (gameState.winNextBtn &&
-        x >= gameState.winNextBtn.x && x <= gameState.winNextBtn.x + gameState.winNextBtn.width &&
-        y >= gameState.winNextBtn.y && y <= gameState.winNextBtn.y + gameState.winNextBtn.height) {
-      if (gameState.currentLevel >= 4) {
-        startGame(1);
-      } else {
-        startGame(gameState.currentLevel + 1);
-      }
-      return;
-    }
-    if (gameState.winHomeBtn &&
-        x >= gameState.winHomeBtn.x && x <= gameState.winHomeBtn.x + gameState.winHomeBtn.width &&
-        y >= gameState.winHomeBtn.y && y <= gameState.winHomeBtn.y + gameState.winHomeBtn.height) {
-      if (gameState.timer) clearInterval(gameState.timer);
-      initGame(gameState.currentLevel);
-      return;
-    }
-    return;
-  }
-
-  if (gameState.controlButtons) {
-    for (const btn of gameState.controlButtons) {
-      if (x >= btn.x && x <= btn.x + btn.width &&
-          y >= btn.y && y <= btn.y + btn.height) {
-        if (btn.action === 'undo' && !btn.disabled) {
-          handleUndo();
-        } else if (btn.action === 'shuffle' && !btn.disabled) {
-          handleShuffle();
-        } else if (btn.action === 'restart') {
-          handleRestart();
-        }
-        return;
-      }
-    }
-  }
-
-  const sortedCards = [...gameState.cards]
-    .filter(c => c.status === 0 && !c.isCover)
-    .sort((a, b) => b.zIndex - a.zIndex);
-
-  for (const card of sortedCards) {
-    if (x >= card.x && x <= card.x + card.width &&
-        y >= card.y && y <= card.y + card.height) {
-      handleCardClick(card);
-      return;
-    }
-  }
-}
-
 function handleCardClick(card) {
+  if (gameState.gamePaused || gameState.showLoseModal || gameState.showWinModal) return;
+  
+  const cardIndex = gameState.cards.findIndex(c => c.id === card.id);
+  if (cardIndex === -1) return;
+  
+  const targetCard = gameState.cards[cardIndex];
+  if (targetCard.isCover || targetCard.status !== 0) return;
+
   gameState.history.push({
     cards: JSON.parse(JSON.stringify(gameState.cards)),
     queue: JSON.parse(JSON.stringify(gameState.queue)),
@@ -965,7 +855,7 @@ function handleCardClick(card) {
 }
 
 function handleUndo() {
-  if (gameState.history.length === 0) return;
+  if (gameState.gamePaused || gameState.history.length === 0 || gameState.undoCount <= 0) return;
   const lastState = gameState.history.pop();
   gameState.cards = lastState.cards;
   gameState.queue = lastState.queue;
@@ -975,6 +865,7 @@ function handleUndo() {
 }
 
 function handleShuffle() {
+  if (gameState.gamePaused || gameState.shuffleCount <= 0) return;
   const washedCards = washCards(gameState.currentLevel, gameState.cards);
   gameState.cards = washedCards;
   gameState.shuffleCount--;
@@ -1035,3 +926,169 @@ ctx.fillRect(0, 0, 100, 100);
 console.log('已绘制测试红色方块');
 
 initGame(1);
+
+wx.onTouchStart(function(res) {
+  const touch = res.touches[0];
+  const x = touch.clientX;
+  const y = touch.clientY;
+  console.log('Touch start:', x, y);
+
+  if (gameState.showStartScreen) {
+    if (gameState.startBtn && x >= gameState.startBtn.x && x <= gameState.startBtn.x + gameState.startBtn.width &&
+        y >= gameState.startBtn.y && y <= gameState.startBtn.y + gameState.startBtn.height) {
+      console.log('点击开始按钮');
+      startGame(1);
+    }
+    return;
+  }
+
+  if (gameState.gamePaused && gameState.pauseContinueBtn) {
+    if (x >= gameState.pauseContinueBtn.x && x <= gameState.pauseContinueBtn.x + gameState.pauseContinueBtn.width &&
+        y >= gameState.pauseContinueBtn.y && y <= gameState.pauseContinueBtn.y + gameState.pauseContinueBtn.height) {
+      console.log('点击继续按钮');
+      gameState.gamePaused = false;
+      render();
+      return;
+    }
+  }
+
+  if (gameState.pauseBtn && x >= gameState.pauseBtn.x && x <= gameState.pauseBtn.x + gameState.pauseBtn.width &&
+      y >= gameState.pauseBtn.y && y <= gameState.pauseBtn.y + gameState.pauseBtn.height) {
+    console.log('点击暂停按钮');
+    if (!gameState.showLoseModal && !gameState.showWinModal) {
+      gameState.gamePaused = !gameState.gamePaused;
+      render();
+    }
+    return;
+  }
+
+  if (gameState.showLoseModal) {
+    if (gameState.loseShareBtn && x >= gameState.loseShareBtn.x && x <= gameState.loseShareBtn.x + gameState.loseShareBtn.width &&
+        y >= gameState.loseShareBtn.y && y <= gameState.loseShareBtn.y + gameState.loseShareBtn.height) {
+      console.log('点击分享按钮（小游戏用分享API）');
+      wx.shareAppMessage({
+        title: '🐕 狗了个狗 - 超好玩的消除游戏！'
+      });
+      return;
+    }
+    if (gameState.loseRestartBtn && x >= gameState.loseRestartBtn.x && x <= gameState.loseRestartBtn.x + gameState.loseRestartBtn.width &&
+        y >= gameState.loseRestartBtn.y && y <= gameState.loseRestartBtn.y + gameState.loseRestartBtn.height) {
+      console.log('点击重新开始按钮');
+      handleLoseConfirm();
+      return;
+    }
+    if (gameState.loseHomeBtn && x >= gameState.loseHomeBtn.x && x <= gameState.loseHomeBtn.x + gameState.loseHomeBtn.width &&
+        y >= gameState.loseHomeBtn.y && y <= gameState.loseHomeBtn.y + gameState.loseHomeBtn.height) {
+      console.log('点击返回首页按钮');
+      gameState.showLoseModal = false;
+      gameState.showStartScreen = true;
+      render();
+      return;
+    }
+    return;
+  }
+
+  if (gameState.showWinModal) {
+    if (gameState.winNextBtn && x >= gameState.winNextBtn.x && x <= gameState.winNextBtn.x + gameState.winNextBtn.width &&
+        y >= gameState.winNextBtn.y && y <= gameState.winNextBtn.y + gameState.winNextBtn.height) {
+      console.log('点击下一关按钮');
+      handleNextLevel();
+      return;
+    }
+    if (gameState.winHomeBtn && x >= gameState.winHomeBtn.x && x <= gameState.winHomeBtn.x + gameState.winHomeBtn.width &&
+        y >= gameState.winHomeBtn.y && y <= gameState.winHomeBtn.y + gameState.winHomeBtn.height) {
+      console.log('点击返回首页按钮');
+      gameState.showWinModal = false;
+      gameState.showStartScreen = true;
+      render();
+      return;
+    }
+    return;
+  }
+
+  if (gameState.gamePaused) {
+    return;
+  }
+
+  if (gameState.controlButtons) {
+    for (const btn of gameState.controlButtons) {
+      if (x >= btn.x && x <= btn.x + btn.width && y >= btn.y && y <= btn.y + btn.height) {
+        if (btn.disabled) {
+          console.log('按钮已禁用');
+          return;
+        }
+        console.log('点击控制按钮:', btn.action);
+        if (btn.action === 'undo') {
+          handleUndo();
+        } else if (btn.action === 'shuffle') {
+          handleShuffle();
+        } else if (btn.action === 'restart') {
+          handleRestart();
+        }
+        return;
+      }
+    }
+  }
+
+  const clickableCards = gameState.cards.filter(c => c.status === 0 && !c.isCover);
+  clickableCards.sort((a, b) => b.zIndex - a.zIndex);
+  
+  for (const card of clickableCards) {
+    if (x >= card.x && x <= card.x + card.width &&
+        y >= card.y && y <= card.y + card.height) {
+      console.log('点击卡牌:', card.emoji, card.id);
+      handleCardClick(card);
+      return;
+    }
+  }
+});
+
+wx.onShowShareAppMessage(function() {
+  console.log('=== onShareAppMessage 被调用 ===');
+  try {
+    const timestamp = Date.now();
+    console.log('保存分享状态:', timestamp);
+    wx.setStorageSync(SHARE_KEY, timestamp);
+    gameState.hasShared = true;
+    wx.showToast({
+      title: '分享成功！',
+      icon: 'success',
+      duration: 1000
+    });
+    
+    if (gameState.showLoseModal) {
+      setTimeout(() => {
+        handleLoseConfirm();
+      }, 500);
+    }
+  } catch (e) {
+    console.error('保存分享状态失败:', e);
+  }
+  return {
+    title: '🐕 狗了个狗 - 超好玩的消除游戏！'
+  };
+});
+
+console.log('=== Touch 事件绑定完成 ===');
+
+let shareCheckInterval = null;
+
+function checkShareStatus() {
+  try {
+    const shared = wx.getStorageSync(SHARE_KEY);
+    if (!!shared && !gameState.hasShared) {
+      gameState.hasShared = true;
+      render();
+    }
+  } catch (e) {
+    console.error('检查分享状态失败:', e);
+  }
+}
+
+setInterval(() => {
+  if (gameState.showLoseModal) {
+    checkShareStatus();
+  }
+}, 500);
+
+console.log('=== 分享状态轮询已启动 ===');
