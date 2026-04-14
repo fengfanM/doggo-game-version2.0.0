@@ -2,6 +2,45 @@
 
 一款基于 Taro 框架开发的微信小程序游戏，复刻经典"羊了个羊"玩法，带你体验不一样的消除乐趣！
 
+<p align="center">
+  <a href="https://github.com/fengfanM/doggo-game/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/fengfanM/doggo-game/ci.yml?branch=main&style=flat-square&label=CI/CD" alt="CI/CD Status">
+  </a>
+  <a href="https://github.com/fengfanM/doggo-game/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/fengfanM/doggo-game?style=flat-square" alt="License">
+  </a>
+  <a href="https://github.com/fengfanM/doggo-game/releases">
+    <img src="https://img.shields.io/github/v/release/fengfanM/doggo-game?style=flat-square" alt="Release">
+  </a>
+  <a href="https://github.com/fengfanM/doggo-game/commits/main">
+    <img src="https://img.shields.io/github/last-commit/fengfanM/doggo-game?style=flat-square" alt="Last Commit">
+  </a>
+  <a href="https://github.com/fengfanM/doggo-game">
+    <img src="https://img.shields.io/github/stars/fengfanM/doggo-game?style=flat-square&logo=github" alt="Stars">
+  </a>
+</p>
+
+<p align="center">
+  <a href="#-快速开始">快速开始</a> ·
+  <a href="#-文档">文档</a> ·
+  <a href="#-贡献">贡献</a> ·
+  <a href="https://github.com/fengfanM/doggo-game/issues">报告问题</a>
+</p>
+
+---
+
+## 📌 快速链接
+
+| 资源 | 链接 |
+|------|------|
+| 📖 完整文档 | [README.md](./README.md) |
+| 📝 变更日志 | [CHANGELOG.md](./CHANGELOG.md) |
+| 🤝 贡献指南 | [CONTRIBUTING.md](./CONTRIBUTING.md) |
+| ⚖️ 行为准则 | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) |
+| 🔒 安全政策 | [SECURITY.md](./SECURITY.md) |
+| 🐛 报告 Bug | [提交 Issue](https://github.com/fengfanM/doggo-game/issues/new/choose) |
+| ✨ 功能请求 | [提交 Feature Request](https://github.com/fengfanM/doggo-game/issues/new/choose) |
+
 ---
 
 ## ⚠️ 原创声明
@@ -24,7 +63,11 @@
 - [核心功能实现](#-核心功能实现)
 - [关卡设计](#-关卡设计)
 - [快速开始](#-快速开始)
+- [自动化脚本](#-自动化脚本)
+- [CI/CD 流程](#-cicd-流程)
 - [开发指南](#-开发指南)
+- [贡献](#-贡献)
+- [许可证](#-许可证)
 
 ---
 
@@ -401,21 +444,58 @@ export const playSound = (type: SoundType) => {
 
 ---
 
-## 📄 许可证
-
-MIT License
-
 ---
 
 ## 🤝 贡献
 
-欢迎提交 Issue 和 Pull Request！
+我们欢迎任何形式的贡献！🙏
+
+### 如何贡献
+
+1. 🍴 Fork 这个仓库
+2. 🌿 创建你的特性分支 (`git checkout -b feature/AmazingFeature`)
+3. ✨ 提交你的变更 (`git commit -m 'feat: 添加一些很棒的功能'`)
+4. 📤 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 🔍 开启一个 Pull Request
+
+详细的贡献指南请查看 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+
+### 问题反馈
+
+- 🐛 报告 Bug：[提交 Issue](https://github.com/fengfanM/doggo-game/issues/new/choose)
+- ✨ 功能请求：[提交 Feature Request](https://github.com/fengfanM/doggo-game/issues/new/choose)
+- ❓ 问题讨论：[GitHub Discussions](https://github.com/fengfanM/doggo-game/discussions)
+
+### 行为准则
+
+参与本项目请遵守 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)。
+
+### 安全问题
+
+请参考 [SECURITY.md](./SECURITY.md) 报告安全问题。
+
+---
+
+## 📄 许可证
+
+本项目采用 MIT License - 详见 [LICENSE](./LICENSE) 文件。
+
+---
+
+## 🙏 致谢
+
+感谢所有为这个项目做出贡献的人！
 
 ---
 
 ## 📞 联系方式
 
-- GitHub: https://github.com/fengfanM/doggo-game
+- GitHub: https://github.com/fengfanM
+- 项目地址: https://github.com/fengfanM/doggo-game
+
+---
+
+**如果这个项目对你有帮助，请给它一个 ⭐ Star！**
 
 ---
 

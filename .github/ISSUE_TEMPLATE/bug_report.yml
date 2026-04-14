@@ -1,0 +1,109 @@
+name: 🐛 Bug 报告
+description: 报告一个 Bug 来帮助我们改进
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你花时间报告这个 Bug！🐛
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: 先决条件
+      description: 在提交 Bug 报告之前，请确认以下事项
+      options:
+        - label: 我已搜索现有 Issue，没有找到类似的问题
+          required: true
+        - label: 我已使用最新版本，问题仍然存在
+          required: false
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug 描述
+      description: 清晰简洁地描述这个 Bug 是什么
+      placeholder: 描述一下你遇到的问题...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 复现步骤
+      description: 提供复现这个 Bug 的步骤
+      value: |
+        1. 打开游戏
+        2. 点击 ...
+        3. ...
+        4. 出现错误
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 预期行为
+      description: 你期望发生什么？
+      placeholder: 描述一下你期望的行为...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？
+      placeholder: 描述一下实际发生的情况...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图/录屏
+      description: 如果可能，请添加截图或录屏来帮助解释你的问题
+      placeholder: 拖拽图片到这里...
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 环境信息
+      description: 你的运行环境是什么？
+      multiple: false
+      options:
+        - 微信开发者工具
+        - iOS 微信
+        - Android 微信
+        - 其他（请在下方说明）
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: 操作系统版本
+      description: 你的操作系统版本是什么？
+      placeholder: e.g. macOS 14.0, Windows 11, iOS 17.0, Android 13
+    validations:
+      required: false
+
+  - type: input
+    id: wechat-version
+    attributes:
+      label: 微信版本
+      description: 你的微信版本是什么？
+      placeholder: e.g. 8.0.40
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 其他信息
+      description: 还有其他我们需要知道的信息吗？
+      placeholder: 添加任何其他相关信息...

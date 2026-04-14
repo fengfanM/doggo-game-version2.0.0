@@ -1,0 +1,60 @@
+name: ❓ 问题/讨论
+description: 提出一个问题或想讨论某个话题
+title: "[Question] "
+labels: ["question", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你提出问题或参与讨论！❓
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: 先决条件
+      description: 在提问之前，请确认以下事项
+      options:
+        - label: 我已搜索现有 Issue 和 Discussions
+          required: true
+        - label: 我已阅读 README.md 文档
+          required: false
+
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: 问题类型
+      description: 这是什么类型的问题？
+      multiple: false
+      options:
+        - 使用问题（如何使用某个功能）
+        - 技术问题（技术实现细节）
+        - 设计问题（产品/交互设计）
+        - 一般讨论
+        - 其他（请在下方说明）
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 你的问题
+      description: 请详细描述你的问题或想讨论的话题
+      placeholder: 我想知道...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 背景信息
+      description: 提供一些背景信息，帮助我们更好地理解你的问题
+      placeholder: 我正在尝试...
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: 其他信息
+      description: 还有其他我们需要知道的信息吗？
+      placeholder: 添加任何其他相关信息...

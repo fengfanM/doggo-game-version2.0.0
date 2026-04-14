@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 查看文档
+    url: https://github.com/fengfanM/doggo-game/blob/main/README.md
+    about: 查看项目文档了解如何使用
+  - name: 💬 讨论区
+    url: https://github.com/fengfanM/doggo-game/discussions
+    about: 在讨论区提问或分享想法
+  - name: 📝 贡献指南
+    url: https://github.com/fengfanM/doggo-game/blob/main/CONTRIBUTING.md
+    about: 了解如何为项目做贡献
