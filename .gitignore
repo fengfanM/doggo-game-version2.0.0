@@ -44,6 +44,7 @@ coverage/
 claude-code/
 reference-sheep/
 node_modules
+src/game.json
 
 # Local QA documents (not pushed to GitHub)
 对话记录-QA.md
