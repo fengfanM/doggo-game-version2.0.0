@@ -1803,7 +1803,6 @@ function handleMineTabClick(x, y) {
 wx.onShowShareAppMessage(function() {
   try {
     const timestamp = Date.now();
-    console.log('[onShowShareAppMessage] 保存分享状态到本地存储，timestamp:', timestamp);
     wx.setStorageSync(SHARE_KEY, timestamp);
     gameState.hasShared = true;
     wx.showToast({
