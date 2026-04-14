@@ -3,6 +3,33 @@
 一款基于 Taro 框架开发的微信小程序游戏，复刻经典"羊了个羊"玩法，带你体验不一样的消除乐趣！
 
 <p align="center">
+  <a href="README.md">中文</a> |
+  <a href="README.en.md">English</a>
+</p>
+
+---
+
+## 🎬 游戏演示
+
+<p align="center">
+  <img src="https://via.placeholder.com/800x600?text=游戏演示GIF动图" alt="游戏演示" width="600">
+</p>
+
+### 如何添加你的游戏演示 GIF
+
+1. **录制游戏视频**：在微信开发者工具或真机上录制游戏过程
+2. **转换为 GIF**：使用工具将视频转换为 GIF（推荐工具：Kap、ScreenToGif、ffmpeg）
+3. **上传到仓库**：将 GIF 文件放到项目的 `assets/` 目录下（需要先创建）
+4. **更新 README**：修改上面的图片链接为你的 GIF 文件路径
+
+**示例：**
+```markdown
+<p align="center">
+  <img src="./assets/demo.gif" alt="游戏演示" width="600">
+</p>
+```
+
+<p align="center">
   <a href="https://github.com/fengfanM/doggo-game/actions/workflows/ci.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/fengfanM/doggo-game/ci.yml?branch=main&style=flat-square&label=CI/CD" alt="CI/CD Status">
   </a>
@@ -31,15 +58,15 @@
 
 ## 📌 快速链接
 
-| 资源 | 链接 |
-|------|------|
-| 📖 完整文档 | [README.md](./README.md) |
-| 📝 变更日志 | [CHANGELOG.md](./CHANGELOG.md) |
-| 🤝 贡献指南 | [CONTRIBUTING.md](./CONTRIBUTING.md) |
-| ⚖️ 行为准则 | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) |
-| 🔒 安全政策 | [SECURITY.md](./SECURITY.md) |
-| 🐛 报告 Bug | [提交 Issue](https://github.com/fengfanM/doggo-game/issues/new/choose) |
-| ✨ 功能请求 | [提交 Feature Request](https://github.com/fengfanM/doggo-game/issues/new/choose) |
+| 资源 | 中文 | English |
+|------|------|---------|
+| 📖 完整文档 | [README.md](./README.md) | [README.en.md](./README.en.md) |
+| 📝 变更日志 | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.en.md](./CHANGELOG.en.md) |
+| 🤝 贡献指南 | [CONTRIBUTING.md](./CONTRIBUTING.md) | [CONTRIBUTING.en.md](./CONTRIBUTING.en.md) |
+| ⚖️ 行为准则 | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) | [CODE_OF_CONDUCT.en.md](./CODE_OF_CONDUCT.en.md) |
+| 🔒 安全政策 | [SECURITY.md](./SECURITY.md) | [SECURITY.en.md](./SECURITY.en.md) |
+| 🐛 报告 Bug | [提交 Issue](https://github.com/fengfanM/doggo-game/issues/new/choose) | - |
+| ✨ 功能请求 | [提交 Feature Request](https://github.com/fengfanM/doggo-game/issues/new/choose) | - |
 
 ---
 
