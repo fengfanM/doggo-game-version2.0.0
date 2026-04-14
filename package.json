@@ -10,7 +10,7 @@
     "framework": "React"
   },
   "scripts": {
-    "build:weapp": "taro build --type weapp && cp src/game.json dist/",
+    "build:weapp": "taro build --type weapp && cp src/game.json dist/ && cp src/game.wxss dist/",
     "build:swan": "taro build --type swan",
     "build:alipay": "taro build --type alipay",
     "build:tt": "taro build --type tt",
