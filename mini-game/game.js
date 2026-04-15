@@ -1821,24 +1821,24 @@ function handleGameTabClick(x, y) {
     if (gameState.loseShareBtn && x >= gameState.loseShareBtn.x && x <= gameState.loseShareBtn.x + gameState.loseShareBtn.width && y >= gameState.loseShareBtn.y && y <= gameState.loseShareBtn.y + gameState.loseShareBtn.height) {
       wx.shareAppMessage({
         title: '狗了个狗 - 超好玩的狗狗消除游戏！',
-        imageUrl: '',
-        success: function() {
-          try {
-            const timestamp = Date.now();
-            console.log('保存分享状态:', timestamp);
-            wx.setStorageSync(SHARE_KEY, timestamp);
-            gameState.hasShared = true;
-            wx.showToast({
-              title: '分享成功！',
-              icon: 'success',
-              duration: 1000
-            });
-            render();
-          } catch (e) {
-            console.error('保存分享状态失败:', e);
-          }
-        }
+        imageUrl: ''
       });
+      
+      try {
+        const timestamp = Date.now();
+        console.log('保存分享状态:', timestamp);
+        wx.setStorageSync(SHARE_KEY, timestamp);
+        gameState.hasShared = true;
+        wx.showToast({
+          title: '分享成功！',
+          icon: 'success',
+          duration: 1000
+        });
+        render();
+      } catch (e) {
+        console.error('保存分享状态失败:', e);
+      }
+      
       return;
     }
 
