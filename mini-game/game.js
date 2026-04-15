@@ -445,6 +445,9 @@ function generateCards(level, cardTypes) {
 
 function checkCover(cards) {
   const updateCards = cards.slice();
+  
+  const activeCards = updateCards.filter(c => c.status === 0);
+  activeCards.sort((a, b) => b.zIndex - a.zIndex);
 
   for (let i = 0; i < updateCards.length; i++) {
     const cur = updateCards[i];
@@ -454,19 +457,15 @@ function checkCover(cards) {
 
     const cardWidth = cur.width + 20;
     const cardHeight = cur.height + 20;
-
     const x1 = cur.x;
     const y1 = cur.y;
     const x2 = x1 + cardWidth;
     const y2 = y1 + cardHeight;
 
-    for (let j = 0; j < updateCards.length; j++) {
-      if (i === j) continue;
-
-      const compare = updateCards[j];
-      if (compare.status !== 0) continue;
-
-      if (compare.zIndex <= cur.zIndex) continue;
+    for (let j = 0; j < activeCards.length; j++) {
+      const compare = activeCards[j];
+      if (compare.id === cur.id) continue;
+      if (compare.zIndex <= cur.zIndex) break;
 
       const x = compare.x;
       const y = compare.y;
@@ -703,8 +702,7 @@ function handleCardClick(card) {
     width: c.width,
     height: c.height,
     zIndex: c.zIndex,
-    status: c.status,
-    isCover: c.isCover
+    status: c.status
   }));
   const historyQueue = gameState.queue.map(c => ({
     id: c.id,
@@ -715,8 +713,7 @@ function handleCardClick(card) {
     width: c.width,
     height: c.height,
     zIndex: c.zIndex,
-    status: c.status,
-    isCover: c.isCover
+    status: c.status
   }));
   
   gameState.history.push({
@@ -725,7 +722,7 @@ function handleCardClick(card) {
     score: gameState.score
   });
 
-  if (gameState.history.length > 5) {
+  if (gameState.history.length > 2) {
     gameState.history.shift();
   }
 
