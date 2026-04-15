@@ -2,10 +2,53 @@ const canvas = wx.createCanvas();
 const ctx = canvas.getContext('2d');
 
 let gameState = {};
+let animationState = {};
 let systemInfo = wx.getSystemInfoSync();
+
+let safeArea = systemInfo.safeArea || {
+  top: 0,
+  bottom: systemInfo.windowHeight,
+  left: 0,
+  right: systemInfo.windowWidth,
+  width: systemInfo.windowWidth,
+  height: systemInfo.windowHeight
+};
+
+const statusBarHeight = systemInfo.statusBarHeight || 0;
+let safeAreaTop = safeArea.top || 0;
+let safeAreaBottom = safeArea.bottom || systemInfo.windowHeight;
+let safeAreaLeft = safeArea.left || 0;
+let safeAreaRight = safeArea.right || systemInfo.windowWidth;
 
 canvas.width = systemInfo.windowWidth;
 canvas.height = systemInfo.windowHeight;
+
+function updateScreenInfo() {
+  systemInfo = wx.getSystemInfoSync();
+  safeArea = systemInfo.safeArea || {
+    top: 0,
+    bottom: systemInfo.windowHeight,
+    left: 0,
+    right: systemInfo.windowWidth,
+    width: systemInfo.windowWidth,
+    height: systemInfo.windowHeight
+  };
+  safeAreaTop = safeArea.top || 0;
+  safeAreaBottom = safeArea.bottom || systemInfo.windowHeight;
+  safeAreaLeft = safeArea.left || 0;
+  safeAreaRight = safeArea.right || systemInfo.windowWidth;
+  canvas.width = systemInfo.windowWidth;
+  canvas.height = systemInfo.windowHeight;
+}
+
+wx.onWindowResize(function(res) {
+  updateScreenInfo();
+  if (gameState.cards && gameState.cards.length > 0) {
+    const levelData = LEVELS[gameState.currentLevel - 1];
+    gameState.cards = generateCards(gameState.currentLevel, levelData.cardTypes);
+  }
+  render();
+});
 
 const DOG_EMOJIS = [
   '🐕',
@@ -30,10 +73,10 @@ const levelConfig = [
 ];
 
 const LEVELS = [
-  { id: 1, name: '新手试炼', difficulty: 'easy', description: '让你觉得你很行～', cardTypes: DOG_EMOJIS.slice(0, 3), cardCount: 18 },
-  { id: 2, name: '初露锋芒', difficulty: 'easy', description: '难度逐渐增加', cardTypes: DOG_EMOJIS.slice(0, 5), cardCount: 45 },
-  { id: 3, name: '极限挑战', difficulty: 'hard', description: '开始有挑战了！', cardTypes: DOG_EMOJIS.slice(0, 7), cardCount: 63 },
-  { id: 4, name: '狗王挑战', difficulty: 'hard', description: '终极挑战！通关率<10%', cardTypes: DOG_EMOJIS.slice(0, 10), cardCount: 90 },
+  { id: 1, name: '新手试炼', difficulty: 'easy', cardTypes: ['🐕', '🐶', '🐩'], cardCount: 18, description: '让你觉得你很行～' },
+  { id: 2, name: '初露锋芒', difficulty: 'easy', cardTypes: ['🐕', '🐶', '🐩', '🦮', '🐕‍🦺'], cardCount: 45, description: '难度逐渐增加' },
+  { id: 3, name: '极限挑战', difficulty: 'hard', cardTypes: ['🐕', '🐶', '🐩', '🦮', '🐕‍🦺', '🐾', '🦴'], cardCount: 63, description: '开始有挑战了！' },
+  { id: 4, name: '狗王挑战', difficulty: 'hard', cardTypes: ['🐕', '🐶', '🐩', '🦮', '🐕‍🦺', '🐾', '🦴', '🎾', '🏆', '⭐'], cardCount: 90, description: '终极挑战！通关率<10%' },
 ];
 
 const STATS_KEY = 'dog_game_stats';
@@ -212,10 +255,48 @@ function fastShuffle(arr) {
   return res;
 }
 
-function generateCards(level) {
+function calculateGameLayoutInternal() {
+  const tabBarHeight = 60;
+  const topPadding = Math.max(safeAreaTop, 10);
+  const bottomPadding = Math.max(canvas.height - safeAreaBottom, 0);
+  const leftPadding = Math.max(safeAreaLeft, 20);
+  const rightPadding = Math.max(canvas.width - safeAreaRight, 20);
+  
+  const availableWidth = canvas.width - leftPadding - rightPadding;
+  const availableHeight = canvas.height - topPadding - 80 - 200 - bottomPadding - tabBarHeight;
+  
+  return {
+    topPadding,
+    bottomPadding,
+    leftPadding,
+    rightPadding,
+    tabBarHeight,
+    availableWidth,
+    availableHeight,
+    centerX: canvas.width / 2,
+    centerY: topPadding + 80 + availableHeight / 2
+  };
+}
+
+function calculateCardSizeInternal(availableWidth, availableHeight, cols, rows) {
+  const baseCellSize = Math.min(availableWidth / (cols + 2), availableHeight / (rows + 2), 70);
+  const minCellSize = Math.min(50, availableWidth / cols, availableHeight / rows);
+  const cellWidth = Math.max(baseCellSize, minCellSize);
+  const cellHeight = cellWidth;
+  return { cellWidth, cellHeight };
+}
+
+function calculateSmoothLayerOffset(layer, totalLayers, baseOffset) {
+  if (totalLayers <= 1) return 0;
+  const progress = layer / (totalLayers - 1);
+  const smoothProgress = 1 - Math.cos(progress * Math.PI) / 2;
+  return baseOffset + smoothProgress * baseOffset * 0.5;
+}
+
+function generateCards(level, cardTypes) {
   const cards = [];
   const config = levelConfig[Math.min(level - 1, levelConfig.length - 1)];
-  const iconPool = DOG_EMOJIS.slice(0, config.types);
+  const iconPool = cardTypes.slice(0, config.types);
 
   const allCards = [];
   for (const type of iconPool) {
@@ -269,38 +350,56 @@ function generateCards(level) {
   }
 
   let zIndex = 0;
-  const centerX = 180;
-  const centerY = 200;
+  const layout = calculateGameLayoutInternal();
 
   for (let layer = 0; layer < config.layers; layer++) {
     const layerData = layerCards[layer];
-    const layerOffset = layer * config.layerOffset;
+    const layerOffset = calculateSmoothLayerOffset(layer, config.layers, config.layerOffset);
     const cardsInLayer = layerData.length;
 
     const cols = Math.ceil(Math.sqrt(cardsInLayer * 1.5));
     const rows = Math.ceil(cardsInLayer / cols);
 
-    const cellWidth = 70;
-    const cellHeight = 70;
-
-    const startX = centerX - (cols * cellWidth) / 2 + layerOffset;
-    const startY = centerY - (rows * cellHeight) / 2 + layerOffset;
+    const { cellWidth, cellHeight } = calculateCardSizeInternal(layout.availableWidth, layout.availableHeight, cols, rows);
+    const bounds = {
+      minX: layout.leftPadding,
+      maxX: canvas.width - layout.rightPadding - cellWidth,
+      minY: layout.topPadding + 80,
+      maxY: canvas.height - layout.bottomPadding - 200 - layout.tabBarHeight - cellHeight
+    };
+    
+    const { startX, startY } = (function() {
+      let sx = layout.centerX - (cols * cellWidth) / 2 + layerOffset;
+      let sy = layout.centerY - (rows * cellHeight) / 2 + layerOffset;
+      
+      sx = Math.max(bounds.minX, Math.min(sx, bounds.maxX - (cols - 1) * cellWidth));
+      sy = Math.max(bounds.minY, Math.min(sy, bounds.maxY - (rows - 1) * cellHeight));
+      
+      return { startX: sx, startY: sy };
+    })();
 
     for (let i = 0; i < layerData.length; i++) {
       const col = i % cols;
       const row = Math.floor(i / cols);
 
-      const randomOffsetX = (Math.random() - 0.5) * 20;
-      const randomOffsetY = (Math.random() - 0.5) * 20;
+      const maxOffset = cellWidth * 0.3;
+      const randomOffsetX = (Math.random() - 0.5) * maxOffset;
+      const randomOffsetY = (Math.random() - 0.5) * maxOffset;
+
+      let cardX = startX + col * cellWidth + randomOffsetX;
+      let cardY = startY + row * cellHeight + randomOffsetY;
+      
+      cardX = Math.max(bounds.minX, Math.min(cardX, bounds.maxX));
+      cardY = Math.max(bounds.minY, Math.min(cardY, bounds.maxY));
 
       cards.push({
         id: generateId(6),
         type: layerData[i].type,
         emoji: layerData[i].emoji,
-        x: startX + col * cellWidth + randomOffsetX,
-        y: startY + row * cellHeight + randomOffsetY,
-        width: 70,
-        height: 70,
+        x: cardX,
+        y: cardY,
+        width: cellWidth,
+        height: cellHeight,
         zIndex: zIndex++,
         isCover: false,
         status: 0
@@ -313,14 +412,15 @@ function generateCards(level) {
 
 function checkCover(cards) {
   const updateCards = cards.slice();
-  const cardWidth = 90;
-  const cardHeight = 90;
 
   for (let i = 0; i < updateCards.length; i++) {
     const cur = updateCards[i];
     cur.isCover = false;
 
     if (cur.status !== 0) continue;
+
+    const cardWidth = cur.width + 20;
+    const cardHeight = cur.height + 20;
 
     const x1 = cur.x;
     const y1 = cur.y;
@@ -355,31 +455,65 @@ function washCards(level, cards) {
   const shuffled = fastShuffle(updateCards);
 
   const config = levelConfig[Math.min(level - 1, levelConfig.length - 1)];
-  const centerX = 180;
-  const centerY = 200;
+  const layout = calculateGameLayoutInternal();
 
-  const cols = Math.ceil(Math.sqrt(shuffled.length * 1.5));
-  const rows = Math.ceil(shuffled.length / cols);
-
-  const cellWidth = 70;
-  const cellHeight = 70;
-
-  const startX = centerX - (cols * cellWidth) / 2;
-  const startY = centerY - (rows * cellHeight) / 2;
+  const numLayers = config.layers;
+  const layerCards = [];
+  
+  for (let layer = 0; layer < numLayers; layer++) {
+    const start = Math.floor((layer / numLayers) * shuffled.length);
+    const end = Math.floor(((layer + 1) / numLayers) * shuffled.length);
+    layerCards.push(shuffled.slice(start, end));
+  }
 
   let zIndex = 0;
-  shuffled.forEach((card, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
 
-    const randomOffsetX = (Math.random() - 0.5) * 20;
-    const randomOffsetY = (Math.random() - 0.5) * 20;
+  for (let layer = 0; layer < numLayers; layer++) {
+    const layerData = layerCards[layer];
+    if (layerData.length === 0) continue;
+    
+    const layerOffset = calculateSmoothLayerOffset(layer, numLayers, config.layerOffset);
+    const cardsInLayer = layerData.length;
 
-    card.x = startX + col * cellWidth + randomOffsetX;
-    card.y = startY + row * cellHeight + randomOffsetY;
-    card.zIndex = zIndex++;
-    card.isCover = false;
-  });
+    const cols = Math.ceil(Math.sqrt(cardsInLayer * 1.5));
+    const rows = Math.ceil(cardsInLayer / cols);
+
+    const { cellWidth, cellHeight } = calculateCardSizeInternal(layout.availableWidth, layout.availableHeight, cols, rows);
+
+    const minX = layout.leftPadding;
+    const maxX = canvas.width - layout.rightPadding - cellWidth;
+    const minY = layout.topPadding + 80;
+    const maxY = canvas.height - layout.bottomPadding - 200 - layout.tabBarHeight - cellHeight;
+    
+    let startX = layout.centerX - (cols * cellWidth) / 2 + layerOffset;
+    let startY = layout.centerY - (rows * cellHeight) / 2 + layerOffset;
+    
+    startX = Math.max(minX, Math.min(startX, maxX - (cols - 1) * cellWidth));
+    startY = Math.max(minY, Math.min(startY, maxY - (rows - 1) * cellHeight));
+
+    for (let i = 0; i < layerData.length; i++) {
+      const card = layerData[i];
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+
+      const maxOffset = cellWidth * 0.3;
+      const randomOffsetX = (Math.random() - 0.5) * maxOffset;
+      const randomOffsetY = (Math.random() - 0.5) * maxOffset;
+
+      let cardX = startX + col * cellWidth + randomOffsetX;
+      let cardY = startY + row * cellHeight + randomOffsetY;
+      
+      cardX = Math.max(minX, Math.min(cardX, maxX));
+      cardY = Math.max(minY, Math.min(cardY, maxY));
+
+      card.x = cardX;
+      card.y = cardY;
+      card.width = cellWidth;
+      card.height = cellHeight;
+      card.zIndex = zIndex++;
+      card.isCover = false;
+    }
+  }
 
   return checkCover([...shuffled, ...eliminatedCards]);
 }
@@ -442,7 +576,8 @@ try {
 render();
 
 function initGame(level = 1) {
-  const cards = checkCover(generateCards(level));
+  const levelData = LEVELS[level - 1];
+  const cards = checkCover(generateCards(level, levelData.cardTypes));
   const gameStats = getGameStats();
 
   gameState.cards = cards;
@@ -478,7 +613,8 @@ function startGame(lvl = 1) {
     clearInterval(gameState.timer);
   }
 
-  const newCards = checkCover(generateCards(lvl));
+  const levelData = LEVELS[lvl - 1];
+  const newCards = checkCover(generateCards(lvl, levelData.cardTypes));
   const gameStats = getGameStats();
 
   gameState.cards = newCards;
@@ -724,22 +860,28 @@ function renderGameTab() {
 }
 
 function renderStartScreen() {
+  const topPadding = Math.max(safeAreaTop, 10);
+  const leftPadding = Math.max(safeAreaLeft, 20);
+  const rightPadding = Math.max(canvas.width - safeAreaRight, 20);
+  
   ctx.fillStyle = '#FF9A3C';
   ctx.font = 'bold 36px Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('🐕', canvas.width / 2, 80);
+  ctx.fillText('🐕', canvas.width / 2, topPadding + 80);
   ctx.font = 'bold 28px Arial, sans-serif';
-  ctx.fillText('狗了个狗', canvas.width / 2, 120);
+  ctx.fillText('狗了个狗', canvas.width / 2, topPadding + 120);
 
+  const availableWidth = canvas.width - leftPadding - rightPadding;
+  const statsSpacing = availableWidth / 2;
   const stats = [
-    { value: gameState.gameStats.highScore, label: '最高分', x: canvas.width / 2 - 100 },
+    { value: gameState.gameStats.highScore, label: '最高分', x: leftPadding + availableWidth / 4 },
     { value: gameState.gameStats.totalWins, label: '通关次数', x: canvas.width / 2 },
-    { value: gameState.gameStats.longestWinStreak, label: '最长连胜', x: canvas.width / 2 + 100 }
+    { value: gameState.gameStats.longestWinStreak, label: '最长连胜', x: canvas.width - rightPadding - availableWidth / 4 }
   ];
 
   stats.forEach(stat => {
     ctx.fillStyle = '#FFFFFF';
-    roundRect(ctx, stat.x - 40, 145, 80, 70, 10);
+    roundRect(ctx, stat.x - 40, topPadding + 145, 80, 70, 10);
     ctx.fill();
     ctx.strokeStyle = '#FF9A3C';
     ctx.lineWidth = 2;
@@ -748,22 +890,22 @@ function renderStartScreen() {
     ctx.fillStyle = '#FF9A3C';
     ctx.font = 'bold 24px Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(String(stat.value), stat.x, 175);
+    ctx.fillText(String(stat.value), stat.x, topPadding + 175);
     ctx.font = '12px Arial, sans-serif';
-    ctx.fillText(stat.label, stat.x, 195);
+    ctx.fillText(stat.label, stat.x, topPadding + 195);
   });
 
   ctx.fillStyle = '#6B5B4F';
   ctx.font = '16px Arial, sans-serif';
   ctx.textAlign = 'left';
-  const descY = 250;
-  ctx.fillText('1️⃣ 点击未被遮挡的卡牌', 40, descY);
-  ctx.fillText('2️⃣ 凑齐3张相同的就能消除', 40, descY + 30);
-  ctx.fillText('3️⃣ 卡槽满了就输了哦～', 40, descY + 60);
+  const descY = topPadding + 250;
+  ctx.fillText('1. 点击未被遮挡的卡牌', leftPadding + 20, descY);
+  ctx.fillText('2. 凑齐3张相同的就能消除', leftPadding + 20, descY + 30);
+  ctx.fillText('3. 卡槽满了就输了哦～', leftPadding + 20, descY + 60);
 
   ctx.textAlign = 'center';
-  ctx.fillText('🔄 每局有2次洗牌机会', canvas.width / 2, descY + 100);
-  ctx.fillText('↩️ 每局有2次撤回机会', canvas.width / 2, descY + 125);
+  ctx.fillText('每局有2次洗牌机会', canvas.width / 2, descY + 100);
+  ctx.fillText('每局有2次撤回机会', canvas.width / 2, descY + 125);
 
   const btnX = canvas.width / 2 - 100;
   const btnY = descY + 155;
@@ -799,39 +941,46 @@ function renderGameScreen() {
 }
 
 function renderHeader() {
+  const topPadding = Math.max(safeAreaTop, 10);
+  const leftPadding = Math.max(safeAreaLeft, 20);
+  const rightPadding = Math.max(canvas.width - safeAreaRight, 20);
+  
   ctx.fillStyle = '#FF9A3C';
   ctx.font = 'bold 20px Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('🐕 狗了个狗 🐕', canvas.width / 2, 25);
+  ctx.fillText('🐕 狗了个狗 🐕', canvas.width / 2, topPadding + 25);
 
-  const pauseBtnX = canvas.width - 50;
+  const pauseBtnX = canvas.width - rightPadding - 20;
   ctx.fillStyle = '#FF9A3C';
   ctx.strokeStyle = '#E88932';
   ctx.lineWidth = 2;
-  roundRect(ctx, pauseBtnX - 25, 10, 40, 35, 8);
+  roundRect(ctx, pauseBtnX - 25, topPadding + 10, 40, 35, 8);
   ctx.fill();
   ctx.stroke();
 
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 18px Arial, sans-serif';
-  ctx.fillText(gameState.gamePaused ? '▶️' : '⏸️', pauseBtnX - 5, 32);
+  ctx.fillText(gameState.gamePaused ? '▶️' : '⏸️', pauseBtnX - 5, topPadding + 32);
 
-  gameState.pauseBtn = { x: pauseBtnX - 25, y: 10, width: 40, height: 35 };
+  gameState.pauseBtn = { x: pauseBtnX - 25, y: topPadding + 10, width: 40, height: 35 };
 
+  const availableWidth = canvas.width - leftPadding - rightPadding - 60;
+  const statsSpacing = availableWidth / 3;
+  
   const stats = [
-    { label: '关卡', value: `${gameState.currentLevel}/4`, x: 40 },
-    { label: '剩余', value: String(gameState.cards.filter(c => c.status === 0).length), x: canvas.width / 2 - 40 },
-    { label: '得分', value: String(gameState.score), x: canvas.width / 2 + 60 },
-    { label: '用时', value: formatTime(gameState.elapsedTime), x: canvas.width - 60 }
+    { label: '关卡', value: `${gameState.currentLevel}/4`, x: leftPadding + 20 },
+    { label: '剩余', value: String(gameState.cards.filter(c => c.status === 0).length), x: leftPadding + 20 + statsSpacing },
+    { label: '得分', value: String(gameState.score), x: leftPadding + 20 + statsSpacing * 2 },
+    { label: '用时', value: formatTime(gameState.elapsedTime), x: canvas.width - rightPadding - 20 }
   ];
 
   ctx.fillStyle = '#6B5B4F';
   ctx.font = '12px Arial, sans-serif';
   stats.forEach(stat => {
     ctx.textAlign = 'center';
-    ctx.fillText(stat.label, stat.x, 55);
+    ctx.fillText(stat.label, stat.x, topPadding + 55);
     ctx.font = 'bold 16px Arial, sans-serif';
-    ctx.fillText(stat.value, stat.x, 75);
+    ctx.fillText(stat.value, stat.x, topPadding + 75);
     ctx.font = '12px Arial, sans-serif';
   });
 }
@@ -843,18 +992,30 @@ function renderCards() {
     .forEach(card => {
       ctx.save();
 
-      ctx.fillStyle = card.isCover ? 'rgba(0,0,0,0.1)' : '#FFFFFF';
-      ctx.strokeStyle = card.isCover ? '#CCC' : '#FF9A3C';
+      if (card.isCover) {
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = '#E8E8E8';
+        ctx.strokeStyle = '#C4B5A5';
+      } else {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.strokeStyle = '#FF9A3C';
+      }
       ctx.lineWidth = 2;
 
       roundRect(ctx, card.x, card.y, card.width, card.height, 10);
       ctx.fill();
       ctx.stroke();
 
-      ctx.font = '36px Arial, sans-serif';
+      if (card.isCover) {
+        ctx.globalAlpha = 0.7;
+      } else {
+        ctx.globalAlpha = 1;
+      }
+      const fontSize = Math.max(card.width * 0.5, 24);
+      ctx.font = `${fontSize}px Arial, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.globalAlpha = card.isCover ? 0.6 : 1;
       ctx.fillText(card.emoji, card.x + card.width / 2, card.y + card.height / 2);
 
       ctx.restore();
@@ -862,8 +1023,11 @@ function renderCards() {
 }
 
 function renderSlot() {
-  const slotY = canvas.height - 200;
-  const slotWidth = 70;
+  const bottomPadding = Math.max(canvas.height - safeAreaBottom, 0);
+  const tabBarHeight = 60;
+  const slotY = canvas.height - 200 - bottomPadding - tabBarHeight;
+  const totalSlotsWidth = canvas.width - 40;
+  const slotWidth = totalSlotsWidth / 7 - 4;
   const slotHeight = 90;
 
   ctx.fillStyle = '#FFF5E6';
@@ -871,15 +1035,16 @@ function renderSlot() {
   ctx.lineWidth = 2;
 
   for (let i = 0; i < 7; i++) {
-    const x = 20 + i * (slotWidth + 5);
+    const x = 20 + i * (slotWidth + 4);
     roundRect(ctx, x, slotY, slotWidth, slotHeight, 10);
     ctx.fill();
     ctx.stroke();
   }
 
   gameState.queue.forEach((card, i) => {
-    const x = 20 + i * (slotWidth + 5);
-    ctx.font = '36px Arial, sans-serif';
+    const x = 20 + i * (slotWidth + 4);
+    const fontSize = Math.max(slotWidth * 0.45, 24);
+    ctx.font = `${fontSize}px Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(card.emoji, x + slotWidth / 2, slotY + slotHeight / 2);
@@ -887,7 +1052,9 @@ function renderSlot() {
 }
 
 function renderControls() {
-  const btnY = canvas.height - 85;
+  const bottomPadding = Math.max(canvas.height - safeAreaBottom, 0);
+  const tabBarHeight = 60;
+  const btnY = canvas.height - 85 - bottomPadding - tabBarHeight;
   const btnWidth = (canvas.width - 80) / 3;
 
   const buttons = [
@@ -1111,23 +1278,27 @@ function renderLevelTab() {
   const levelProgress = getLevelProgress();
   gameState.levelProgress = levelProgress;
 
+  const topPadding = Math.max(safeAreaTop, 10);
+  const leftPadding = Math.max(safeAreaLeft, 20);
+  const rightPadding = Math.max(canvas.width - safeAreaRight, 20);
+
   ctx.fillStyle = '#FF9A3C';
   ctx.font = 'bold 24px Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('🎮 关卡选择', canvas.width / 2, 40);
+  ctx.fillText('🎮 关卡选择', canvas.width / 2, topPadding + 40);
 
   ctx.font = '14px Arial, sans-serif';
   ctx.fillStyle = '#6B5B4F';
-  ctx.fillText(`挑战关卡进度：${levelProgress.completedLevels.length} / 4`, canvas.width / 2, 65);
+  ctx.fillText(`挑战关卡进度：${levelProgress.completedLevels.length} / 4`, canvas.width / 2, topPadding + 65);
 
-  let y = 85;
+  let y = topPadding + 85;
   LEVELS.forEach(level => {
     const unlocked = isLevelUnlocked(level.id);
     const completed = isLevelCompleted(level.id);
     
-    const cardX = 20;
+    const cardX = leftPadding;
     const cardY = y;
-    const cardWidth = canvas.width - 40;
+    const cardWidth = canvas.width - leftPadding - rightPadding;
     const cardHeight = 140;
 
     ctx.fillStyle = unlocked ? '#FFFFFF' : '#E5E5E5';
@@ -1255,25 +1426,28 @@ function renderMineTab() {
   gameState.levelProgress = levelProgress;
 
   const isDogKingUnlocked = levelProgress.completedLevels.length === 4;
+  const topPadding = Math.max(safeAreaTop, 0);
+  const leftPadding = Math.max(safeAreaLeft, 20);
+  const rightPadding = Math.max(canvas.width - safeAreaRight, 20);
 
   ctx.fillStyle = '#FF9A3C';
-  roundRect(ctx, 0, 0, canvas.width, 180, 0);
+  roundRect(ctx, 0, 0, canvas.width, 180 + topPadding, 0);
   ctx.fill();
 
   ctx.font = '48px Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('🐕', canvas.width / 2, 80);
+  ctx.fillText('🐕', canvas.width / 2, 80 + topPadding);
 
   ctx.font = 'bold 20px Arial, sans-serif';
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillText('狗狗玩家', canvas.width / 2, 110);
+  ctx.fillText('狗狗玩家', canvas.width / 2, 110 + topPadding);
 
   ctx.font = '14px Arial, sans-serif';
-  ctx.fillText('开心消除，快乐生活！', canvas.width / 2, 135);
+  ctx.fillText('开心消除，快乐生活！', canvas.width / 2, 135 + topPadding);
 
-  const achievementY = 160;
+  const achievementY = 160 + topPadding;
   ctx.fillStyle = '#FFFFFF';
-  roundRect(ctx, 20, achievementY, canvas.width - 40, 220, 15);
+  roundRect(ctx, leftPadding, achievementY, canvas.width - leftPadding - rightPadding, 220, 15);
   ctx.fill();
   ctx.strokeStyle = '#FF9A3C';
   ctx.lineWidth = 2;
@@ -1282,26 +1456,26 @@ function renderMineTab() {
   ctx.fillStyle = '#6B5B4F';
   ctx.font = 'bold 18px Arial, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('🏆 狗王勋章', 40, achievementY + 35);
+  ctx.fillText('🏆 狗王勋章', leftPadding + 20, achievementY + 35);
 
   ctx.textAlign = 'right';
   if (isDogKingUnlocked) {
     ctx.fillStyle = '#FFD700';
     ctx.font = 'bold 16px Arial, sans-serif';
-    ctx.fillText('👑 狗王', canvas.width - 40, achievementY + 35);
+    ctx.fillText('👑 狗王', canvas.width - rightPadding - 20, achievementY + 35);
   }
 
   ctx.textAlign = 'left';
   ctx.font = '14px Arial, sans-serif';
   ctx.fillStyle = '#6B5B4F';
   if (isDogKingUnlocked) {
-    ctx.fillText('恭喜！你已成为真正的狗王！', 40, achievementY + 60);
+    ctx.fillText('恭喜！你已成为真正的狗王！', leftPadding + 20, achievementY + 60);
   } else {
-    ctx.fillText('通关所有4个关卡，解锁狗王勋章！', 40, achievementY + 60);
+    ctx.fillText('通关所有4个关卡，解锁狗王勋章！', leftPadding + 20, achievementY + 60);
   }
 
-  const progressWidth = canvas.width - 80;
-  const progressX = 40;
+  const progressWidth = canvas.width - leftPadding - rightPadding - 40;
+  const progressX = leftPadding + 20;
   const progressY = achievementY + 75;
   ctx.fillStyle = '#E5E5E5';
   roundRect(ctx, progressX, progressY, progressWidth, 20, 10);
@@ -1325,15 +1499,15 @@ function renderMineTab() {
     ctx.fillStyle = completed ? '#4CAF50' : '#999999';
     ctx.font = '20px Arial, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(completed ? '✓' : '○', 40, checkY);
+    ctx.fillText(completed ? '✓' : '○', leftPadding + 20, checkY);
 
     ctx.fillStyle = '#6B5B4F';
     ctx.font = '14px Arial, sans-serif';
-    ctx.fillText(level.name, 65, checkY);
+    ctx.fillText(level.name, leftPadding + 45, checkY);
 
     if (completed && bestTime !== undefined) {
       ctx.textAlign = 'right';
-      ctx.fillText(`⏱️ ${formatTime(bestTime)}`, canvas.width - 40, checkY);
+      ctx.fillText(`⏱️ ${formatTime(bestTime)}`, canvas.width - rightPadding - 20, checkY);
     }
 
     checkY += 25;
@@ -1341,7 +1515,7 @@ function renderMineTab() {
 
   const statsY = achievementY + 235;
   ctx.fillStyle = '#FFFFFF';
-  roundRect(ctx, 20, statsY, canvas.width - 40, 120, 15);
+  roundRect(ctx, leftPadding, statsY, canvas.width - leftPadding - rightPadding, 120, 15);
   ctx.fill();
   ctx.strokeStyle = '#FF9A3C';
   ctx.lineWidth = 2;
@@ -1350,12 +1524,13 @@ function renderMineTab() {
   ctx.fillStyle = '#6B5B4F';
   ctx.font = 'bold 16px Arial, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('游戏数据', 40, statsY + 35);
+  ctx.fillText('游戏数据', leftPadding + 20, statsY + 35);
 
+  const availableWidth = canvas.width - leftPadding - rightPadding;
   const statItems = [
-    { value: gameStats.totalWins, label: '通关次数', x: canvas.width / 4 },
-    { value: gameStats.highScore, label: '最高分数', x: canvas.width / 2 },
-    { value: gameStats.longestWinStreak, label: '最长连胜', x: canvas.width * 3 / 4 }
+    { value: gameStats.totalWins, label: '通关次数', x: leftPadding + availableWidth / 6 },
+    { value: gameStats.highScore, label: '最高分数', x: leftPadding + availableWidth / 2 },
+    { value: gameStats.longestWinStreak, label: '最长连胜', x: canvas.width - rightPadding - availableWidth / 6 }
   ];
 
   statItems.forEach(stat => {
@@ -1381,21 +1556,21 @@ function renderMineTab() {
   menuItems.forEach((item, index) => {
     const itemY = menuY + index * 60;
     ctx.fillStyle = '#FFFFFF';
-    roundRect(ctx, 20, itemY, canvas.width - 40, 55, 10);
+    roundRect(ctx, leftPadding, itemY, canvas.width - leftPadding - rightPadding, 55, 10);
     ctx.fill();
 
     ctx.textAlign = 'left';
     ctx.font = '24px Arial, sans-serif';
-    ctx.fillText(item.icon, 40, itemY + 35);
+    ctx.fillText(item.icon, leftPadding + 20, itemY + 35);
     ctx.fillStyle = '#6B5B4F';
     ctx.font = '16px Arial, sans-serif';
-    ctx.fillText(item.text, 80, itemY + 35);
+    ctx.fillText(item.text, leftPadding + 60, itemY + 35);
 
     ctx.textAlign = 'right';
     ctx.font = '20px Arial, sans-serif';
-    ctx.fillText('>', canvas.width - 40, itemY + 35);
+    ctx.fillText('>', canvas.width - rightPadding - 20, itemY + 35);
 
-    gameState.menuButtons.push({ ...item, x: 20, y: itemY, width: canvas.width - 40, height: 55 });
+    gameState.menuButtons.push({ ...item, x: leftPadding, y: itemY, width: canvas.width - leftPadding - rightPadding, height: 55 });
   });
 
   if (gameState.showGameStatsModal) {
@@ -1561,11 +1736,13 @@ function renderSettingsModal() {
 }
 
 function renderTabBar() {
-  const tabBarY = canvas.height - 60;
+  const tabBarHeight = 60;
+  const bottomPadding = Math.max(canvas.height - safeAreaBottom, 0);
+  const tabBarY = canvas.height - tabBarHeight - bottomPadding;
   const tabWidth = canvas.width / 3;
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(0, tabBarY, canvas.width, 60);
+  ctx.fillRect(0, tabBarY, canvas.width, tabBarHeight + bottomPadding);
 
   ctx.strokeStyle = '#E5E5E5';
   ctx.lineWidth = 1;
@@ -1590,7 +1767,7 @@ function renderTabBar() {
     ctx.fillText(tab.label, x + tabWidth / 2, tabBarY + 38);
 
     gameState.tabButtons = gameState.tabButtons || [];
-    gameState.tabButtons[tab.index] = { x, y: tabBarY, width: tabWidth, height: 60, index: tab.index };
+    gameState.tabButtons[tab.index] = { x, y: tabBarY, width: tabWidth, height: tabBarHeight + bottomPadding, index: tab.index };
   });
 }
 
@@ -1599,14 +1776,6 @@ wx.onTouchStart(function(res) {
   const x = touch.clientX;
   const y = touch.clientY;
   console.log('Touch start:', x, y);
-
-  if (gameState.currentTab === 0) {
-    handleGameTabClick(x, y);
-  } else if (gameState.currentTab === 1) {
-    handleLevelTabClick(x, y);
-  } else if (gameState.currentTab === 2) {
-    handleMineTabClick(x, y);
-  }
 
   if (gameState.tabButtons) {
     for (let i = 0; i < gameState.tabButtons.length; i++) {
@@ -1617,6 +1786,14 @@ wx.onTouchStart(function(res) {
         return;
       }
     }
+  }
+
+  if (gameState.currentTab === 0) {
+    handleGameTabClick(x, y);
+  } else if (gameState.currentTab === 1) {
+    handleLevelTabClick(x, y);
+  } else if (gameState.currentTab === 2) {
+    handleMineTabClick(x, y);
   }
 });
 
