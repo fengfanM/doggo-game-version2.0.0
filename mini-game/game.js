@@ -9,75 +9,11 @@ let bgMusic = null;
 let soundEffects = {};
 
 function playSound(type) {
-  const settings = getSettings();
-  if (!settings.soundEnabled) return;
-  
-  try {
-    setTimeout(() => {
-      try {
-        const sound = wx.createInnerAudioContext();
-        sound.src = `https://cdn.jsdelivr.net/gh/fengfanM/doggo-game-assets@main/sounds/${type}.mp3`;
-        sound.loop = false;
-        sound.volume = 0.4;
-        
-        sound.onCanplay(() => {
-          try {
-            sound.play();
-          } catch (e) {
-            sound.destroy();
-          }
-        });
-        
-        sound.onEnded(() => {
-          sound.destroy();
-        });
-        sound.onError((err) => {
-          sound.destroy();
-        });
-      } catch (e) {
-        console.log('Failed to play sound:', e);
-      }
-    }, 0);
-  } catch (e) {
-    console.log('Failed to play sound:', e);
-  }
+  console.log('Sound disabled for performance:', type);
 }
 
 function playBgMusic() {
-  const settings = getSettings();
-  if (!settings.musicEnabled) return;
-  
-  try {
-    setTimeout(() => {
-      try {
-        if (bgMusic) {
-          bgMusic.stop();
-          bgMusic.destroy();
-        }
-        bgMusic = wx.createInnerAudioContext();
-        bgMusic.src = 'https://cdn.jsdelivr.net/gh/fengfanM/doggo-game-assets@main/sounds/bgm.mp3';
-        bgMusic.loop = true;
-        bgMusic.volume = 0.15;
-        
-        bgMusic.onCanplay(() => {
-          try {
-            bgMusic.play();
-          } catch (e) {
-            bgMusic = null;
-          }
-        });
-        
-        bgMusic.onError((err) => {
-          bgMusic = null;
-        });
-      } catch (e) {
-        console.log('Failed to play bgm:', e);
-        bgMusic = null;
-      }
-    }, 0);
-  } catch (e) {
-    console.log('Failed to play bgm:', e);
-  }
+  console.log('BGM disabled for performance');
 }
 
 function stopBgMusic() {
@@ -758,13 +694,38 @@ function handleCardClick(card) {
 
   playSound('click');
 
+  const historyCards = gameState.cards.map(c => ({
+    id: c.id,
+    type: c.type,
+    emoji: c.emoji,
+    x: c.x,
+    y: c.y,
+    width: c.width,
+    height: c.height,
+    zIndex: c.zIndex,
+    status: c.status,
+    isCover: c.isCover
+  }));
+  const historyQueue = gameState.queue.map(c => ({
+    id: c.id,
+    type: c.type,
+    emoji: c.emoji,
+    x: c.x,
+    y: c.y,
+    width: c.width,
+    height: c.height,
+    zIndex: c.zIndex,
+    status: c.status,
+    isCover: c.isCover
+  }));
+  
   gameState.history.push({
-    cards: JSON.parse(JSON.stringify(gameState.cards)),
-    queue: JSON.parse(JSON.stringify(gameState.queue)),
+    cards: historyCards,
+    queue: historyQueue,
     score: gameState.score
   });
 
-  if (gameState.history.length > 10) {
+  if (gameState.history.length > 5) {
     gameState.history.shift();
   }
 
