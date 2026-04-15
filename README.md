@@ -1,6 +1,6 @@
 <p align="center">
   <br>
-  <img src="https://via.placeholder.com/120?text=🐕" alt="Logo" width="120">
+  <img src="./狗了个狗游戏介绍.png" alt="Logo" width="600">
   <br>
 </p>
 
@@ -81,14 +81,6 @@
 - [x] **自适应布局**：动态计算，完美适配
 - [x] **安全区域**：刘海屏、挖孔屏适配
 - [x] **CI/CD**：自动化构建和测试
-
----
-
-## 🎬 演示
-
-<p align="center">
-  <img src="https://via.placeholder.com/800x450?text=游戏演示" alt="Demo" width="800">
-</p>
 
 ---
 
@@ -207,9 +199,69 @@ function calculateSmoothLayerOffset(layer, totalLayers, baseOffset) {
 
 ### 4. 第4关特殊算法
 
-目标：通关率 < 5%
+**目标**：通关率 < 5%
 
-策略：相同类型卡牌分散到不同层，增加消除难度
+**策略**：相同类型卡牌分散到不同层，增加消除难度
+
+**伪代码实现**：
+
+```javascript
+function generateLevel4Cards(config) {
+  // 1. 初始化类型追踪器
+  const typeIndexTracker = new Map();
+  for (let i = 0; i < config.types; i++) {
+    typeIndexTracker.set(i, 0);
+  }
+
+  // 2. 创建卡牌池
+  const iconPool = DOG_EMOJIS.slice(0, config.types);
+  const cards = [];
+
+  // 3. 生成所有卡牌（按类型顺序，确保分散）
+  for (let typeIndex = 0; typeIndex < config.types; typeIndex++) {
+    for (let cardIndex = 0; cardIndex < config.cardsPerType; cardIndex++) {
+      cards.push({
+        id: `${typeIndex}-${cardIndex}`,
+        type: iconPool[typeIndex],
+        typeIndex: typeIndex
+      });
+    }
+  }
+
+  // 4. 分配到不同层（关键步骤）
+  const layerCount = config.layers;
+  const cardsPerLayer = Math.ceil(cards.length / layerCount);
+  const layers = Array.from({ length: layerCount }, () => []);
+
+  for (let i = 0; i < cards.length; i++) {
+    // 循环分配到各层，确保相同类型分散
+    const layerIndex = i % layerCount;
+    layers[layerIndex].push(cards[i]);
+  }
+
+  // 5. 每一层内随机打乱（保持层间分散）
+  for (let layer of layers) {
+    fastShuffle(layer);
+  }
+
+  // 6. 合并为最终卡牌列表（从底层到顶层）
+  let finalCards = [];
+  for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+    const layerCards = layers[layerIndex];
+    for (let card of layerCards) {
+      card.zIndex = layerIndex;
+      finalCards.push(card);
+    }
+  }
+
+  return finalCards;
+}
+```
+
+**核心思想**：
+- 相同类型的卡牌被分配到不同层，难以一次性凑齐3张
+- 每层内随机打乱，增加随机性
+- 从底层到顶层排列，确保层叠效果正确
 
 ---
 
