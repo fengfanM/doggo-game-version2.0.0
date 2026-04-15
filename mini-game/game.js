@@ -1818,7 +1818,9 @@ function handleGameTabClick(x, y) {
   }
 
   if (gameState.showLoseModal) {
-    if (gameState.loseShareBtn && x >= gameState.loseShareBtn.x && x <= gameState.loseShareBtn.x + gameState.loseShareBtn.width && y >= gameState.loseShareBtn.y && y <= gameState.loseShareBtn.y + gameState.loseShareBtn.height) {
+    const needShare = gameState.failCount >= 1 && !gameState.hasShared;
+
+    if (needShare && gameState.loseShareBtn && x >= gameState.loseShareBtn.x && x <= gameState.loseShareBtn.x + gameState.loseShareBtn.width && y >= gameState.loseShareBtn.y && y <= gameState.loseShareBtn.y + gameState.loseShareBtn.height) {
       wx.shareAppMessage({
         title: '狗了个狗 - 超好玩的狗狗消除游戏！',
         imageUrl: ''
@@ -1849,7 +1851,7 @@ function handleGameTabClick(x, y) {
       return;
     }
 
-    if (gameState.loseRestartBtn && x >= gameState.loseRestartBtn.x && x <= gameState.loseRestartBtn.x + gameState.loseRestartBtn.width && y >= gameState.loseRestartBtn.y && y <= gameState.loseRestartBtn.y + gameState.loseRestartBtn.height) {
+    if (!needShare && gameState.loseRestartBtn && x >= gameState.loseRestartBtn.x && x <= gameState.loseRestartBtn.x + gameState.loseRestartBtn.width && y >= gameState.loseRestartBtn.y && y <= gameState.loseRestartBtn.y + gameState.loseRestartBtn.height) {
       handleLoseConfirm();
       return;
     }
