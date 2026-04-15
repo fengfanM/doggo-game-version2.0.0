@@ -1,6 +1,6 @@
 # 🐕 Doggo Game - A Fun Match-3 Game
 
-A WeChat Mini Program game developed with Taro framework, inspired by the classic "Sheep a Sheep" gameplay, bringing you a unique matching experience!
+A match-3 elimination game inspired by the classic "Sheep a Sheep", supporting both WeChat Mini Program and WeChat Mini Game platforms. Built with Taro + TypeScript (Mini Program version) and pure Canvas API (Mini Game version). Features adaptive layout for various screen sizes, multi-layer stacking, shuffle, undo, and more.
 
 <p align="center">
   <a href="README.md">中文</a> |
@@ -29,23 +29,21 @@ A WeChat Mini Program game developed with Taro framework, inspired by the classi
 </p>
 ```
 
----
-
 <p align="center">
-  <a href="https://github.com/fengfanM/doggo-game/actions/workflows/ci.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/fengfanM/doggo-game/ci.yml?branch=main&style=flat-square&label=CI/CD" alt="CI/CD Status">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/fengfanM/doggo-game-version2.0.0/ci.yml?branch=main&style=flat-square&label=CI/CD" alt="CI/CD Status">
   </a>
-  <a href="https://github.com/fengfanM/doggo-game/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/fengfanM/doggo-game?style=flat-square" alt="License">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/fengfanM/doggo-game-version2.0.0?style=flat-square" alt="License">
   </a>
-  <a href="https://github.com/fengfanM/doggo-game/releases">
-    <img src="https://img.shields.io/github/v/release/fengfanM/doggo-game?style=flat-square" alt="Release">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/releases">
+    <img src="https://img.shields.io/github/v/release/fengfanM/doggo-game-version2.0.0?style=flat-square" alt="Release">
   </a>
-  <a href="https://github.com/fengfanM/doggo-game/commits/main">
-    <img src="https://img.shields.io/github/last-commit/fengfanM/doggo-game?style=flat-square" alt="Last Commit">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/commits/main">
+    <img src="https://img.shields.io/github/last-commit/fengfanM/doggo-game-version2.0.0?style=flat-square" alt="Last Commit">
   </a>
-  <a href="https://github.com/fengfanM/doggo-game">
-    <img src="https://img.shields.io/github/stars/fengfanM/doggo-game?style=flat-square&logo=github" alt="Stars">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0">
+    <img src="https://img.shields.io/github/stars/fengfanM/doggo-game-version2.0.0?style=flat-square&logo=github" alt="Stars">
   </a>
 </p>
 
@@ -53,7 +51,7 @@ A WeChat Mini Program game developed with Taro framework, inspired by the classi
   <a href="#-quick-start">Quick Start</a> ·
   <a href="#-documentation">Documentation</a> ·
   <a href="#-contributing">Contributing</a> ·
-  <a href="https://github.com/fengfanM/doggo-game/issues">Report Issues</a>
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/issues">Report Issues</a>
 </p>
 
 ---
@@ -63,12 +61,14 @@ A WeChat Mini Program game developed with Taro framework, inspired by the classi
 | Resource | Link |
 |----------|------|
 | 📖 Full Documentation | [README.en.md](./README.en.md) |
+| 📱 Mini Program Docs | [README.en.md](./README.en.md) |
+| 🎮 Mini Game Docs | [mini-game/README.en.md](./mini-game/README.en.md) |
 | 📝 Changelog | [CHANGELOG.en.md](./CHANGELOG.en.md) |
 | 🤝 Contributing Guide | [CONTRIBUTING.en.md](./CONTRIBUTING.en.md) |
 | ⚖️ Code of Conduct | [CODE_OF_CONDUCT.en.md](./CODE_OF_CONDUCT.en.md) |
 | 🔒 Security Policy | [SECURITY.en.md](./SECURITY.en.md) |
-| 🐛 Report Bug | [Submit Issue](https://github.com/fengfanM/doggo-game/issues/new/choose) |
-| ✨ Feature Request | [Submit Feature Request](https://github.com/fengfanM/doggo-game/issues/new/choose) |
+| 🐛 Report Bug | [Submit Issue](https://github.com/fengfanM/doggo-game-version2.0.0/issues/new/choose) |
+| ✨ Feature Request | [Submit Feature Request](https://github.com/fengfanM/doggo-game-version2.0.0/issues/new/choose) |
 
 ---
 
@@ -84,6 +84,7 @@ A WeChat Mini Program game developed with Taro framework, inspired by the classi
 
 ## 📋 Table of Contents
 
+- [Dual Platform Support](#-dual-platform-support)
 - [Gameplay](#-gameplay)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
@@ -98,28 +99,47 @@ A WeChat Mini Program game developed with Taro framework, inspired by the classi
 
 ---
 
+## 📱 Dual Platform Support
+
+This project supports two platforms:
+
+### WeChat Mini Program Version (Recommended)
+- **Tech Stack**: Taro 4.1.9 + TypeScript
+- **Rendering**: React Components + Taro Framework
+- **Features**: Clear code structure, easy to extend
+- **Location**: Root directory (all files except `mini-game/`)
+
+### WeChat Mini Game Version
+- **Tech Stack**: Native JavaScript + Canvas API
+- **Rendering**: Pure Canvas 2D rendering
+- **Features**: Excellent performance, fast startup
+- **Location**: `mini-game/` directory
+
+---
+
 ## 🎮 Gameplay
 
 ### Basic Rules
-1. **Click Cards**: Click cards in the game area to move them to the bottom slot
-2. **Match Rule**: When there are **3 cards of the same type** in the slot, they are automatically eliminated
-3. **Lose Condition**: Game over when the slot is full (more than 7 cards) and cannot be eliminated
+1. **Tap Cards**: Tap cards in the game area to move them to the bottom slot
+2. **Elimination**: When there are **3 identical cards** in the slot, they are automatically eliminated
+3. **Lose Condition**: Game ends when the slot is full (7+ cards) with no possible matches
 4. **Win Condition**: Eliminate all cards on the board to win
 
-### Item System
-- **🔄 Undo**: Undo the last move (2 uses per level)
-- **🔀 Shuffle**: Randomly shuffle card positions (2 uses per level)
+### Power-ups
+- **🔄 Undo**: Undo your last move (2 per level)
+- **🔀 Shuffle**: Randomly rearrange cards on the board (2 per level)
 
 ### Restart Mechanism
-- **1st failure**: Free restart (refund undo and shuffle uses)
-- **2nd failure and beyond**: Need to share to WeChat groups to get restart opportunities
+- **1st fail**: Free restart (refunds undo and shuffle counts)
+- **2nd fail and beyond**: Share to WeChat group to get restart chance
 
 ---
 
 ## 🛠️ Tech Stack
 
+### WeChat Mini Program Version
 | Category | Technology | Version |
-|----------|------------|---------|
+|----------|-----------|---------|
 | **Framework** | Taro | 4.1.9 |
 | **Language** | TypeScript | 5.x |
 | **Styling** | SCSS | - |
@@ -127,13 +147,20 @@ A WeChat Mini Program game developed with Taro framework, inspired by the classi
 | **Build Tool** | Webpack | - |
 | **Target Platform** | WeChat Mini Program | - |
 
+### WeChat Mini Game Version
+| Category | Technology | Description |
+|----------|-----------|-------------|
+| **Rendering Engine** | Canvas API | Pure native Canvas rendering |
+| **Language** | JavaScript | Native JS, no compilation needed |
+| **Target Platform** | WeChat Mini Game | WeChat Mini Game environment |
+
 ---
 
 ## 📁 Project Structure
 
 ```
 sheep/
-├── src/
+├── src/                      # WeChat Mini Program source code
 │   ├── pages/              # Pages
 │   │   ├── game/           # Game main page
 │   │   ├── level/          # Level selection page
@@ -144,15 +171,25 @@ sheep/
 │   │   └── CardSlot/       # Card slot component
 │   ├── data/               # Data
 │   │   └── levels.ts       # Level configuration
-│   ├── utils/              # Utilities
+│   ├── utils/              # Utility functions
 │   │   ├── game.ts         # Game core logic
 │   │   ├── storage.ts      # Local storage
 │   │   ├── sound.ts        # Sound management
 │   │   └── dailyTasks.ts   # Daily tasks
 │   ├── styles/             # Global styles
 │   ├── app.ts              # App entry
-│   └── app.config.ts       # App config
-├── config/                 # Taro config
+│   └── app.config.ts       # App configuration
+├── mini-game/               # WeChat Mini Game source code
+│   ├── game.js             # Main game logic
+│   ├── game.json           # Mini game configuration
+│   ├── project.config.json # Project configuration
+│   ├── utils.js            # Layout calculation utilities
+│   ├── shuffle-utils.js    # Shuffle and stacking algorithms
+│   ├── README.md           # Mini game docs (Chinese)
+│   ├── README.en.md        # Mini game docs (English)
+│   ├── UTILS_README.md     # Utility functions documentation
+│   └── SHUFFLE_README.md   # Shuffle algorithm documentation
+├── config/                 # Taro configuration
 ├── dist/                   # Build output
 └── package.json
 ```
@@ -163,222 +200,115 @@ sheep/
 
 ### 1. Card Generation and Layout Algorithm
 
-**File**: `src/utils/game.ts`
+**Mini Program Version**: `src/utils/game.ts`
 
-#### Key Process
-```typescript
-// 1. Generate card pool based on level config
-const iconPool = DOG_EMOJIS.slice(0, config.types);
-const cards: Card[] = [];
-for (let i = 0; i < config.types; i++) {
-  for (let j = 0; j < config.cardsPerType; j++) {
-    cards.push({
-      id: `${i}-${j}`,
-      type: iconPool[i]
-    });
-  }
-}
-
-// 2. Shuffle cards randomly
-const shuffledCards = shuffleArray(cards);
-
-// 3. Place cards in layers (upper layers cover lower layers)
-for (let layer = 0; layer < config.layers; layer++) {
-  // Calculate card positions for each layer
-  // Add offset for staggered layout
-}
-
-// 4. Special level algorithm (Level 4)
-// Disperse same-type cards across different layers to increase difficulty
-```
+**Mini Game Version**: `mini-game/game.js` + `mini-game/shuffle-utils.js`
 
 #### Key Features
 - ✅ Ensure each card type count is a multiple of 3
-- ✅ Randomize card positions for replayability
-- ✅ Layered design with upper layers covering lower
-- ✅ Level 4 uses dispersion algorithm to lower win rate
+- ✅ Randomize card positions for gameplay variety
+- ✅ Layered design, upper layers cover lower layers
+- ✅ Level 4 uses scattering algorithm to reduce pass rate
+- ✅ Mini game uses smooth layer offset algorithm (cosine function)
 
 ---
 
-### 2. Cover Detection and Click Judgment
+### 2. Mini Game Version Features
 
-**File**: `src/utils/game.ts` - `checkCover` function
+Mini game version includes these additional features:
 
-```typescript
-export function checkCover(cards: Card[]): Card[] {
-  cards.forEach(card => {
-    card.isCovered = false;
-    card.coveringCards = [];
-  });
-
-  // For each card, check if any other card covers it
-  cards.forEach((cardA, indexA) => {
-    cards.forEach((cardB, indexB) => {
-      if (indexA === indexB) return;
-      
-      // Check if overlapping and cardB is above cardA
-      const isOverlapping = checkOverlap(cardA, cardB);
-      const isAbove = cardB.layer > cardA.layer;
-      
-      if (isOverlapping && isAbove) {
-        cardA.isCovered = true;
-        cardA.coveringCards!.push(cardB.id);
-      }
-    });
-  });
-
-  return cards;
+#### Smooth Layer Offset Algorithm
+```javascript
+function calculateSmoothLayerOffset(layer, totalLayers, baseOffset) {
+  if (totalLayers <= 1) return 0;
+  const progress = layer / (totalLayers - 1);
+  const smoothProgress = 1 - Math.cos(progress * Math.PI) / 2;
+  return baseOffset + smoothProgress * baseOffset * 0.5;
 }
 ```
 
----
+#### Adaptive Layout
+- Dynamic card size calculation
+- Safe area adaptation
+- Boundary constraints to prevent overflow
 
-### 3. Game State Management
-
-**File**: `src/pages/game/index.tsx`
-
-| State | Description |
-|-------|-------------|
-| `cards` | All cards on board |
-| `slot` | Cards in slot |
-| `score` | Current score |
-| `undoCount` | Remaining undo uses |
-| `shuffleCount` | Remaining shuffle uses |
-| `gamePaused` | Is game paused |
-| `showLoseModal` | Show lose modal |
-| `showWinModal` | Show win modal |
-| `failCount` | Fail count (controls restart logic) |
-| `hasShared` | Has shared (controls restart logic) |
-| `elapsedTime` | Game elapsed time (seconds) |
-
----
-
-### 4. Timer Implementation
-
-**Solving closure trap**: Use `useRef` to store latest state
-
-```typescript
-const gameStateRef = useRef({
-  gamePaused,
-  showLoseModal,
-  showWinModal,
-  showStartScreen
-});
-
-useEffect(() => {
-  gameStateRef.current = {
-    gamePaused,
-    showLoseModal,
-    showWinModal,
-    showStartScreen
-  };
-}, [gamePaused, showLoseModal, showWinModal, showStartScreen]);
-
-useEffect(() => {
-  timerRef.current = setInterval(() => {
-    const { gamePaused, showLoseModal, showWinModal, showStartScreen } = gameStateRef.current;
-    if (!gamePaused && !showLoseModal && !showWinModal && !showStartScreen) {
-      setElapsedTime(prev => prev + 1);
-    }
-  }, 1000);
-  
-  return () => clearInterval(timerRef.current);
-}, []);
-```
-
----
-
-### 5. Share Callback and Auto-Restart
-
-**File**: `src/pages/game/index.tsx`
-
-```typescript
-// Global ref to update state in onShareAppMessage
-let setHasSharedRef: ((value: boolean) => void) | null = null;
-
-export const onShareAppMessage = () => {
-  try {
-    Taro.setStorageSync(SHARE_STORAGE_KEY, Date.now());
-    if (setHasSharedRef) {
-      setHasSharedRef(true);
-    }
-    Taro.showToast({ title: 'Share successful!', icon: 'success', duration: 1000 });
-  } catch (e) {
-    console.error('Failed to save share state:', e);
-  }
-  return { title: '🐕 Doggo Game', path: '/pages/index/index' };
-};
-
-// Set ref in component
-useEffect(() => {
-  setHasSharedRef = setHasShared;
-  return () => {
-    setHasSharedRef = null;
-  };
-}, []);
-
-// Listen for share state and auto-restart
-useEffect(() => {
-  if (hasShared && showLoseModal) {
-    handleLoseConfirm();
-  }
-}, [hasShared, showLoseModal]);
-```
+#### Modular Utilities
+- `utils.js`: Layout calculation utilities
+- `shuffle-utils.js`: Shuffle and stacking algorithms
 
 ---
 
 ## 🎯 Level Design
 
-| Level | Types | Cards per Type | Total Cards | Layers | Difficulty | Target Win Rate |
-|-------|-------|-----------------|-------------|--------|------------|-----------------|
+| Level | Card Types | Cards per Type | Total Cards | Layers | Difficulty | Target Pass Rate |
+|-------|-------------|-----------------|-------------|--------|------------|-----------------|
 | 1 | 3 | 6 | 18 | 2 | ⭐ Easy | > 90% |
-| 2 | 5 | 6 | 30 | 3 | ⭐ Easy | > 70% |
+| 2 | 5 | 9 | 45 | 3 | ⭐ Medium | > 70% |
 | 3 | 7 | 9 | 63 | 4 | ⭐⭐⭐ Hard | < 30% |
-| 4 | 12 | 15 | 180 | 8 | ⭐⭐⭐⭐⭐ Expert | < 5% |
+| 4 | 10 | 9 | 90 | 6 | ⭐⭐⭐⭐⭐ Expert | < 5% |
 
 ### Level 4 Special Algorithm
-- ✅ Same-type cards dispersed across different layers
+- ✅ Same type cards scattered across different layers
 - ✅ Increased card types and count
 - ✅ Increased layers and layer offset
-- ✅ Goal: < 5% of players can clear
+- ✅ Goal: Less than 5% of players can pass
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### WeChat Mini Program Version
+
+#### Requirements
 - Node.js >= 16
 - npm or yarn
 - WeChat DevTools
 
-### Install Dependencies
+#### Install Dependencies
 ```bash
 npm install
 ```
 
-### Development Mode
+#### Development Mode
 ```bash
 npm run dev:weapp
 ```
 
-### Production Build
+#### Production Build
 ```bash
 npm run build:weapp
 ```
 
-### WeChat DevTools
+#### WeChat DevTools
 1. Open WeChat DevTools
-2. Select "Import Project"
-3. Project directory: select `dist` folder
-4. AppID: enter your Mini Program AppID
+2. Select "Mini Program"
+3. Import project, select `dist` folder
+4. Enter your Mini Program AppID
+
+---
+
+### WeChat Mini Game Version
+
+#### Requirements
+- WeChat DevTools
+- WeChat Mini Game development access
+
+#### Import Project
+1. Open WeChat DevTools
+2. Select "Mini Game"
+3. Import project, select `mini-game` folder
+4. Enter your Mini Game AppID
+5. Click "Compile"
+
+Detailed docs: [mini-game/README.en.md](./mini-game/README.en.md)
 
 ---
 
 ## 🤖 Automation Scripts
 
-### Local Auto-Commit and Push
+### Local Auto Commit & Push
 
-Use the auto-commit script to complete git add → commit → push in one step:
+Use auto commit script to complete git add → commit → push in one step:
 
 ```bash
 # Method 1: Use npm script
@@ -387,51 +317,51 @@ npm run auto-commit "Your commit message"
 # Method 2: Run script directly
 ./scripts/auto-commit.sh "Your commit message"
 
-# Method 3: Without commit message (uses default)
+# Method 3: Without commit message (use default)
 npm run auto-commit
 ```
 
 **Script Features**:
-- ✅ Auto-check git status
-- ✅ Auto-add all modified files
-- ✅ Auto-create commit
-- ✅ Auto-pull latest code (avoid conflicts)
-- ✅ Auto-push to remote
+- ✅ Auto check git status
+- ✅ Auto add all modified files
+- ✅ Auto create commit
+- ✅ Auto pull latest code (avoid conflicts)
+- ✅ Auto push to remote repo
 - 🎨 Beautiful colored output
 
 ---
 
 ## 🔄 CI/CD Pipeline
 
-Project is configured with GitHub Actions CI/CD pipeline, automatically runs on every push or Pull Request:
+Project has GitHub Actions CI/CD configured, runs automatically on every push or PR:
 
-### CI/CD Tasks
+### CI/CD Task List
 | Step | Description |
 |------|-------------|
-| 📥 Checkout code | Checkout repository |
+| 📥 Checkout code | Checkout code |
 | 🟢 Setup Node.js | Setup Node.js environment |
-| 📦 Install dependencies | Install dependencies with npm ci |
-| 🔍 TypeScript type check | TypeScript type checking |
-| 📝 ESLint check | Code style checking |
-| 🔨 Build project | Build WeChat Mini Program |
+| 📦 Install dependencies | Install dependencies |
+| 🔍 TypeScript type check | TypeScript type check |
+| 📝 ESLint check | Code style check |
+| 🔨 Build project | Build project |
 | ✅ Upload build artifacts | Upload build artifacts |
 
 ### View CI/CD Results
-Visit: https://github.com/fengfanM/doggo-game/actions
+Visit: https://github.com/fengfanM/doggo-game-version2.0.0/actions
 
 ---
 
 ## 💻 Development Guide
 
-### Code Linting and Formatting
+### Code Checking & Formatting
 ```bash
 # TypeScript type check
 npm run typecheck
 
-# ESLint code check
+# ESLint check
 npm run lint
 
-# ESLint auto-fix
+# ESLint auto fix
 npm run lint:fix
 
 # Run tests
@@ -439,7 +369,7 @@ npm run test
 ```
 
 ### Add New Level
-Modify `src/data/levels.ts`:
+Modify `src/data/levels.ts` (Mini Program) or `mini-game/game.js` (Mini Game):
 ```typescript
 const levelConfig = [
   // ... existing levels
@@ -453,16 +383,16 @@ const levelConfig = [
 ```
 
 ### Add New Cards
-Modify `DOG_EMOJIS` array in `src/utils/game.ts`:
+Modify emoji array in `src/utils/game.ts` (Mini Program) or `mini-game/game.js` (Mini Game):
 ```typescript
 export const DOG_EMOJIS = [
   '🐕', '🐶', '🐩', '🦮', '🐕‍🦺',
-  // ... add more emojis
+  // ... add more emoji
 ];
 ```
 
-### Modify Sounds
-Modify `src/utils/sound.ts`:
+### Modify Sound Effects
+Modify `src/utils/sound.ts` (Mini Program):
 ```typescript
 export const playSound = (type: SoundType) => {
   // Custom sound logic
@@ -473,7 +403,7 @@ export const playSound = (type: SoundType) => {
 
 ## 🤝 Contributing
 
-We welcome contributions of any kind! 🙏
+We welcome contributions of all kinds! 🙏
 
 ### How to Contribute
 
@@ -483,21 +413,21 @@ We welcome contributions of any kind! 🙏
 4. 📤 Push to the branch (`git push origin feature/AmazingFeature`)
 5. 🔍 Open a Pull Request
 
-See [CONTRIBUTING.en.md](./CONTRIBUTING.en.md) for detailed guidelines.
+Detailed contributing guide: [CONTRIBUTING.en.md](./CONTRIBUTING.en.md).
 
-### Issue Feedback
+### Issue Reporting
 
-- 🐛 Report Bug: [Submit Issue](https://github.com/fengfanM/doggo-game/issues/new/choose)
-- ✨ Feature Request: [Submit Feature Request](https://github.com/fengfanM/doggo-game/issues/new/choose)
-- ❓ Questions/Discussions: [GitHub Discussions](https://github.com/fengfanM/doggo-game/discussions)
+- 🐛 Report Bug: [Submit Issue](https://github.com/fengfanM/doggo-game-version2.0.0/issues/new/choose)
+- ✨ Feature Request: [Submit Feature Request](https://github.com/fengfanM/doggo-game-version2.0.0/issues/new/choose)
+- ❓ Questions: [GitHub Discussions](https://github.com/fengfanM/doggo-game-version2.0.0/discussions)
 
 ### Code of Conduct
 
-Please follow [CODE_OF_CONDUCT.en.md](./CODE_OF_CONDUCT.en.md) when participating in this project.
+Please adhere to [CODE_OF_CONDUCT.en.md](./CODE_OF_CONDUCT.en.md).
 
 ### Security Issues
 
-Please refer to [SECURITY.en.md](./SECURITY.en.md) to report security issues.
+Please report security issues via [SECURITY.en.md](./SECURITY.en.md).
 
 ---
 
@@ -516,7 +446,7 @@ Thanks to everyone who has contributed to this project!
 ## 📞 Contact
 
 - GitHub: https://github.com/fengfanM
-- Project: https://github.com/fengfanM/doggo-game
+- Project: https://github.com/fengfanM/doggo-game-version2.0.0
 
 ---
 

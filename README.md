@@ -1,6 +1,6 @@
 # 🐕 狗了个狗 - 超好玩的消除游戏
 
-一款基于 Taro 框架开发的微信小程序游戏，复刻经典"羊了个羊"玩法，带你体验不一样的消除乐趣！
+复刻经典"羊了个羊"玩法的消除游戏，支持微信小程序和微信小游戏双平台。采用 Taro + TypeScript（小程序版）和纯 Canvas API（小游戏版）开发，自适应各种屏幕尺寸，支持多层堆叠、洗牌、撤回等完整功能。
 
 <p align="center">
   <a href="README.md">中文</a> |
@@ -30,20 +30,20 @@
 ```
 
 <p align="center">
-  <a href="https://github.com/fengfanM/doggo-game/actions/workflows/ci.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/fengfanM/doggo-game/ci.yml?branch=main&style=flat-square&label=CI/CD" alt="CI/CD Status">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/fengfanM/doggo-game-version2.0.0/ci.yml?branch=main&style=flat-square&label=CI/CD" alt="CI/CD Status">
   </a>
-  <a href="https://github.com/fengfanM/doggo-game/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/fengfanM/doggo-game?style=flat-square" alt="License">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/fengfanM/doggo-game-version2.0.0?style=flat-square" alt="License">
   </a>
-  <a href="https://github.com/fengfanM/doggo-game/releases">
-    <img src="https://img.shields.io/github/v/release/fengfanM/doggo-game?style=flat-square" alt="Release">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/releases">
+    <img src="https://img.shields.io/github/v/release/fengfanM/doggo-game-version2.0.0?style=flat-square" alt="Release">
   </a>
-  <a href="https://github.com/fengfanM/doggo-game/commits/main">
-    <img src="https://img.shields.io/github/last-commit/fengfanM/doggo-game?style=flat-square" alt="Last Commit">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/commits/main">
+    <img src="https://img.shields.io/github/last-commit/fengfanM/doggo-game-version2.0.0?style=flat-square" alt="Last Commit">
   </a>
-  <a href="https://github.com/fengfanM/doggo-game">
-    <img src="https://img.shields.io/github/stars/fengfanM/doggo-game?style=flat-square&logo=github" alt="Stars">
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0">
+    <img src="https://img.shields.io/github/stars/fengfanM/doggo-game-version2.0.0?style=flat-square&logo=github" alt="Stars">
   </a>
 </p>
 
@@ -51,7 +51,7 @@
   <a href="#-快速开始">快速开始</a> ·
   <a href="#-文档">文档</a> ·
   <a href="#-贡献">贡献</a> ·
-  <a href="https://github.com/fengfanM/doggo-game/issues">报告问题</a>
+  <a href="https://github.com/fengfanM/doggo-game-version2.0.0/issues">报告问题</a>
 </p>
 
 ---
@@ -61,12 +61,14 @@
 | 资源 | 中文 | English |
 |------|------|---------|
 | 📖 完整文档 | [README.md](./README.md) | [README.en.md](./README.en.md) |
+| 📱 小程序文档 | [README.md](./README.md) | - |
+| 🎮 小游戏文档 | [mini-game/README.md](./mini-game/README.md) | [mini-game/README.en.md](./mini-game/README.en.md) |
 | 📝 变更日志 | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.en.md](./CHANGELOG.en.md) |
 | 🤝 贡献指南 | [CONTRIBUTING.md](./CONTRIBUTING.md) | [CONTRIBUTING.en.md](./CONTRIBUTING.en.md) |
 | ⚖️ 行为准则 | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) | [CODE_OF_CONDUCT.en.md](./CODE_OF_CONDUCT.en.md) |
 | 🔒 安全政策 | [SECURITY.md](./SECURITY.md) | [SECURITY.en.md](./SECURITY.en.md) |
-| 🐛 报告 Bug | [提交 Issue](https://github.com/fengfanM/doggo-game/issues/new/choose) | - |
-| ✨ 功能请求 | [提交 Feature Request](https://github.com/fengfanM/doggo-game/issues/new/choose) | - |
+| 🐛 报告 Bug | [提交 Issue](https://github.com/fengfanM/doggo-game-version2.0.0/issues/new/choose) | - |
+| ✨ 功能请求 | [提交 Feature Request](https://github.com/fengfanM/doggo-game-version2.0.0/issues/new/choose) | - |
 
 ---
 
@@ -84,6 +86,7 @@
 
 ## 📋 目录
 
+- [双平台支持](#-双平台支持)
 - [游戏玩法](#-游戏玩法)
 - [技术栈](#-技术栈)
 - [项目结构](#-项目结构)
@@ -95,6 +98,24 @@
 - [开发指南](#-开发指南)
 - [贡献](#-贡献)
 - [许可证](#-许可证)
+
+---
+
+## 📱 双平台支持
+
+本项目支持两个平台：
+
+### 微信小程序版本（推荐）
+- **技术栈**：Taro 4.1.9 + TypeScript
+- **渲染方式**：React 组件 + Taro 框架
+- **特点**：代码结构清晰，易于扩展
+- **位置**：根目录（除 `mini-game/` 外的所有文件）
+
+### 微信小游戏版本
+- **技术栈**：原生 JavaScript + Canvas API
+- **渲染方式**：纯 Canvas 2D 渲染
+- **特点**：性能优异，启动快速
+- **位置**：`mini-game/` 目录
 
 ---
 
@@ -118,6 +139,7 @@
 
 ## 🛠️ 技术栈
 
+### 微信小程序版本
 | 类别 | 技术选型 | 版本 |
 |------|----------|------|
 | **框架** | Taro | 4.1.9 |
@@ -127,13 +149,20 @@
 | **编译工具** | Webpack | - |
 | **目标平台** | 微信小程序 | - |
 
+### 微信小游戏版本
+| 类别 | 技术选型 | 说明 |
+|------|----------|------|
+| **渲染引擎** | Canvas API | 纯原生 Canvas 渲染 |
+| **开发语言** | JavaScript | 原生 JS，无需编译 |
+| **目标平台** | 微信小游戏 | 微信小游戏环境 |
+
 ---
 
 ## 📁 项目结构
 
 ```
 sheep/
-├── src/
+├── src/                      # 微信小程序版本源代码
 │   ├── pages/              # 页面
 │   │   ├── game/           # 游戏主页面
 │   │   ├── level/          # 关卡选择页面
@@ -152,6 +181,16 @@ sheep/
 │   ├── styles/             # 全局样式
 │   ├── app.ts              # 应用入口
 │   └── app.config.ts       # 应用配置
+├── mini-game/               # 微信小游戏版本源代码
+│   ├── game.js             # 游戏主逻辑
+│   ├── game.json           # 小游戏配置
+│   ├── project.config.json # 项目配置
+│   ├── utils.js            # 布局计算工具
+│   ├── shuffle-utils.js    # 洗牌和层叠算法
+│   ├── README.md           # 小游戏文档（中文）
+│   ├── README.en.md        # 小游戏文档（英文）
+│   ├── UTILS_README.md     # 工具函数文档
+│   └── SHUFFLE_README.md   # 洗牌算法文档
 ├── config/                 # Taro 配置
 ├── dist/                   # 编译输出
 └── package.json
@@ -163,7 +202,9 @@ sheep/
 
 ### 1. 卡牌生成与布局算法
 
-**文件位置**：`src/utils/game.ts`
+**小程序版本**：`src/utils/game.ts`
+
+**小游戏版本**：`mini-game/game.js` + `mini-game/shuffle-utils.js`
 
 #### 核心流程
 ```typescript
@@ -197,6 +238,7 @@ for (let layer = 0; layer < config.layers; layer++) {
 - ✅ 随机化卡牌位置，增加游戏性
 - ✅ 分层设计，上层卡牌遮挡下层
 - ✅ 第 4 关采用分散算法，降低通关率
+- ✅ 小游戏版本使用平滑层偏移算法（余弦函数）
 
 ---
 
@@ -233,97 +275,28 @@ export function checkCover(cards: Card[]): Card[] {
 
 ---
 
-### 3. 游戏状态管理
+### 3. 小游戏版本特性
 
-**文件位置**：`src/pages/game/index.tsx`
+小游戏版本额外包含以下特性：
 
-| 状态 | 说明 |
-|------|------|
-| `cards` | 场上所有卡牌 |
-| `slot` | 卡槽中的卡牌 |
-| `score` | 当前分数 |
-| `undoCount` | 剩余撤回次数 |
-| `shuffleCount` | 剩余洗牌次数 |
-| `gamePaused` | 游戏是否暂停 |
-| `showLoseModal` | 是否显示失败弹窗 |
-| `showWinModal` | 是否显示胜利弹窗 |
-| `failCount` | 失败次数（控制重新开始逻辑） |
-| `hasShared` | 是否已分享（控制重新开始逻辑） |
-| `elapsedTime` | 游戏用时（秒） |
-
----
-
-### 4. 计时器实现
-
-**解决闭包陷阱问题**：使用 `useRef` 存储最新状态
-
-```typescript
-const gameStateRef = useRef({
-  gamePaused,
-  showLoseModal,
-  showWinModal,
-  showStartScreen
-});
-
-useEffect(() => {
-  gameStateRef.current = {
-    gamePaused,
-    showLoseModal,
-    showWinModal,
-    showStartScreen
-  };
-}, [gamePaused, showLoseModal, showWinModal, showStartScreen]);
-
-useEffect(() => {
-  timerRef.current = setInterval(() => {
-    const { gamePaused, showLoseModal, showWinModal, showStartScreen } = gameStateRef.current;
-    if (!gamePaused && !showLoseModal && !showWinModal && !showStartScreen) {
-      setElapsedTime(prev => prev + 1);
-    }
-  }, 1000);
-  
-  return () => clearInterval(timerRef.current);
-}, []);
+#### 平滑层偏移算法
+```javascript
+function calculateSmoothLayerOffset(layer, totalLayers, baseOffset) {
+  if (totalLayers <= 1) return 0;
+  const progress = layer / (totalLayers - 1);
+  const smoothProgress = 1 - Math.cos(progress * Math.PI) / 2;
+  return baseOffset + smoothProgress * baseOffset * 0.5;
+}
 ```
 
----
+#### 自适应布局
+- 动态计算卡牌尺寸
+- 安全区域适配
+- 边界限制，防止溢出
 
-### 5. 分享回调与自动重新开始
-
-**文件位置**：`src/pages/game/index.tsx`
-
-```typescript
-// 全局 ref，用于在 onShareAppMessage 中更新状态
-let setHasSharedRef: ((value: boolean) => void) | null = null;
-
-export const onShareAppMessage = () => {
-  try {
-    Taro.setStorageSync(SHARE_STORAGE_KEY, Date.now());
-    if (setHasSharedRef) {
-      setHasSharedRef(true);
-    }
-    Taro.showToast({ title: '分享成功！', icon: 'success', duration: 1000 });
-  } catch (e) {
-    console.error('保存分享状态失败:', e);
-  }
-  return { title: '🐕 狗了个狗', path: '/pages/index/index' };
-};
-
-// 在组件中设置 ref
-useEffect(() => {
-  setHasSharedRef = setHasShared;
-  return () => {
-    setHasSharedRef = null;
-  };
-}, []);
-
-// 监听分享状态，自动重新开始
-useEffect(() => {
-  if (hasShared && showLoseModal) {
-    handleLoseConfirm();
-  }
-}, [hasShared, showLoseModal]);
-```
+#### 模块化工具
+- `utils.js`：布局计算工具
+- `shuffle-utils.js`：洗牌和层叠算法
 
 ---
 
@@ -332,9 +305,9 @@ useEffect(() => {
 | 关卡 | 种类数 | 每种卡牌数 | 总卡牌数 | 层数 | 难度 | 目标通关率 |
 |------|--------|------------|----------|------|------|------------|
 | 1 | 3 | 6 | 18 | 2 | ⭐ 简单 | > 90% |
-| 2 | 5 | 6 | 30 | 3 | ⭐ 简单 | > 70% |
+| 2 | 5 | 9 | 45 | 3 | ⭐ 中等 | > 70% |
 | 3 | 7 | 9 | 63 | 4 | ⭐⭐⭐ 困难 | < 30% |
-| 4 | 12 | 15 | 180 | 8 | ⭐⭐⭐⭐⭐ 地狱 | < 5% |
+| 4 | 10 | 9 | 90 | 6 | ⭐⭐⭐⭐⭐ 地狱 | < 5% |
 
 ### 第 4 关特殊算法
 - ✅ 相同类型卡牌分散在不同层
@@ -346,31 +319,50 @@ useEffect(() => {
 
 ## 🚀 快速开始
 
-### 环境要求
+### 微信小程序版本
+
+#### 环境要求
 - Node.js >= 16
 - npm 或 yarn
 - 微信开发者工具
 
-### 安装依赖
+#### 安装依赖
 ```bash
 npm install
 ```
 
-### 开发模式
+#### 开发模式
 ```bash
 npm run dev:weapp
 ```
 
-### 生产构建
+#### 生产构建
 ```bash
 npm run build:weapp
 ```
 
-### 微信开发者工具
+#### 微信开发者工具
 1. 打开微信开发者工具
-2. 选择「导入项目」
-3. 项目目录选择 `dist` 文件夹
+2. 选择「小程序」
+3. 导入项目，项目目录选择 `dist` 文件夹
 4. AppID 填入你的小程序 AppID
+
+---
+
+### 微信小游戏版本
+
+#### 环境要求
+- 微信开发者工具
+- 微信小游戏开发权限
+
+#### 导入项目
+1. 打开微信开发者工具
+2. 选择「小游戏」
+3. 导入项目，项目目录选择 `mini-game` 文件夹
+4. AppID 填入你的小游戏 AppID
+5. 点击「编译」
+
+详细文档请查看：[mini-game/README.md](./mini-game/README.md)
 
 ---
 
@@ -417,7 +409,7 @@ npm run auto-commit
 | ✅ Upload build artifacts | 上传构建产物 |
 
 ### 查看 CI/CD 结果
-访问：https://github.com/fengfanM/doggo-game/actions
+访问：https://github.com/fengfanM/doggo-game-version2.0.0/actions
 
 ---
 
@@ -439,7 +431,7 @@ npm run test
 ```
 
 ### 添加新关卡
-修改 `src/data/levels.ts`：
+修改 `src/data/levels.ts`（小程序版本）或 `mini-game/game.js`（小游戏版本）：
 ```typescript
 const levelConfig = [
   // ... 现有关卡
@@ -453,7 +445,7 @@ const levelConfig = [
 ```
 
 ### 添加新卡牌
-修改 `src/utils/game.ts` 中的 `DOG_EMOJIS` 数组：
+修改 `src/utils/game.ts`（小程序版本）或 `mini-game/game.js`（小游戏版本）中的 emoji 数组：
 ```typescript
 export const DOG_EMOJIS = [
   '🐕', '🐶', '🐩', '🦮', '🐕‍🦺',
@@ -462,7 +454,7 @@ export const DOG_EMOJIS = [
 ```
 
 ### 修改音效
-修改 `src/utils/sound.ts`：
+修改 `src/utils/sound.ts`（小程序版本）：
 ```typescript
 export const playSound = (type: SoundType) => {
   // 自定义音效逻辑
@@ -489,9 +481,9 @@ export const playSound = (type: SoundType) => {
 
 ### 问题反馈
 
-- 🐛 报告 Bug：[提交 Issue](https://github.com/fengfanM/doggo-game/issues/new/choose)
-- ✨ 功能请求：[提交 Feature Request](https://github.com/fengfanM/doggo-game/issues/new/choose)
-- ❓ 问题讨论：[GitHub Discussions](https://github.com/fengfanM/doggo-game/discussions)
+- 🐛 报告 Bug：[提交 Issue](https://github.com/fengfanM/doggo-game-version2.0.0/issues/new/choose)
+- ✨ 功能请求：[提交 Feature Request](https://github.com/fengfanM/doggo-game-version2.0.0/issues/new/choose)
+- ❓ 问题讨论：[GitHub Discussions](https://github.com/fengfanM/doggo-game-version2.0.0/discussions)
 
 ### 行为准则
 
@@ -518,7 +510,7 @@ export const playSound = (type: SoundType) => {
 ## 📞 联系方式
 
 - GitHub: https://github.com/fengfanM
-- 项目地址: https://github.com/fengfanM/doggo-game
+- 项目地址: https://github.com/fengfanM/doggo-game-version2.0.0
 
 ---
 
