@@ -5,7 +5,85 @@ let gameState = {};
 let animationState = {};
 let systemInfo = wx.getSystemInfoSync();
 
-const dpr = systemInfo.pixelRatio || 2;
+let bgMusic = null;
+let soundEffects = {};
+
+function playSound(type) {
+  const settings = getSettings();
+  if (!settings.soundEnabled) return;
+  
+  try {
+    if (soundEffects[type]) {
+      soundEffects[type].stop();
+    }
+    const sound = wx.createInnerAudioContext();
+    sound.src = `https://cdn.jsdelivr.net/gh/fengfanM/doggo-game-assets@main/sounds/${type}.mp3`;
+    sound.loop = false;
+    sound.volume = 0.7;
+    sound.play();
+    soundEffects[type] = sound;
+    
+    sound.onEnded(() => {
+      sound.destroy();
+      if (soundEffects[type] === sound) {
+        delete soundEffects[type];
+      }
+    });
+    sound.onError((err) => {
+      console.log('Sound error:', err);
+      sound.destroy();
+    });
+  } catch (e) {
+    console.log('Failed to play sound:', e);
+  }
+}
+
+function playBgMusic() {
+  const settings = getSettings();
+  if (!settings.musicEnabled) return;
+  
+  try {
+    if (bgMusic) {
+      bgMusic.stop();
+      bgMusic.destroy();
+    }
+    bgMusic = wx.createInnerAudioContext();
+    bgMusic.src = 'https://cdn.jsdelivr.net/gh/fengfanM/doggo-game-assets@main/sounds/bgm.mp3';
+    bgMusic.loop = true;
+    bgMusic.volume = 0.3;
+    bgMusic.play();
+    
+    bgMusic.onError((err) => {
+      console.log('BGM error:', err);
+      bgMusic = null;
+    });
+  } catch (e) {
+    console.log('Failed to play bgm:', e);
+    bgMusic = null;
+  }
+}
+
+function stopBgMusic() {
+  if (bgMusic) {
+    bgMusic.stop();
+    bgMusic.destroy();
+    bgMusic = null;
+  }
+}
+
+function pauseBgMusic() {
+  if (bgMusic) {
+    bgMusic.pause();
+  }
+}
+
+function resumeBgMusic() {
+  const settings = getSettings();
+  if (!settings.musicEnabled) return;
+  if (bgMusic) {
+    bgMusic.play();
+  }
+}
 
 let safeArea = systemInfo.safeArea || {
   top: 0,
@@ -22,9 +100,8 @@ let safeAreaBottom = safeArea.bottom || systemInfo.windowHeight;
 let safeAreaLeft = safeArea.left || 0;
 let safeAreaRight = safeArea.right || systemInfo.windowWidth;
 
-canvas.width = systemInfo.windowWidth * dpr;
-canvas.height = systemInfo.windowHeight * dpr;
-ctx.scale(dpr, dpr);
+canvas.width = systemInfo.windowWidth;
+canvas.height = systemInfo.windowHeight;
 
 function updateScreenInfo() {
   systemInfo = wx.getSystemInfoSync();
@@ -40,9 +117,8 @@ function updateScreenInfo() {
   safeAreaBottom = safeArea.bottom || systemInfo.windowHeight;
   safeAreaLeft = safeArea.left || 0;
   safeAreaRight = safeArea.right || systemInfo.windowWidth;
-  canvas.width = systemInfo.windowWidth * dpr;
-  canvas.height = systemInfo.windowHeight * dpr;
-  ctx.scale(dpr, dpr);
+  canvas.width = systemInfo.windowWidth;
+  canvas.height = systemInfo.windowHeight;
 }
 
 wx.onWindowResize(function(res) {
@@ -649,6 +725,8 @@ function startGame(lvl = 1) {
     }
   }, 1000);
 
+  playSound('start');
+  playBgMusic();
   render();
 }
 
@@ -660,6 +738,8 @@ function handleCardClick(card) {
   
   const targetCard = gameState.cards[cardIndex];
   if (targetCard.isCover || targetCard.status !== 0) return;
+
+  playSound('click');
 
   gameState.history.push({
     cards: JSON.parse(JSON.stringify(gameState.cards)),
@@ -692,6 +772,7 @@ function handleCardClick(card) {
   const typesToRemove = Object.keys(typeCounts).filter(type => typeCounts[type] >= 3);
 
   if (typesToRemove.length > 0) {
+    playSound('match');
     typesToRemove.forEach(type => {
       let removed = 0;
       updateQueue = updateQueue.filter(card => {
@@ -717,6 +798,8 @@ function handleCardClick(card) {
 
   if (updateQueue.length === 7) {
     gameState.showLoseModal = true;
+    playSound('lose');
+    stopBgMusic();
     if (gameState.timer) {
       clearInterval(gameState.timer);
     }
@@ -725,6 +808,8 @@ function handleCardClick(card) {
   const winCheck = !finalCheckedCards.find(s => s.status !== 2);
   if (winCheck) {
     gameState.showWinModal = true;
+    playSound('win');
+    stopBgMusic();
     
     completeLevel(gameState.currentLevel, gameState.elapsedTime);
     
@@ -960,22 +1045,12 @@ function renderHeader() {
 
   const pauseBtnX = canvas.width - rightPadding - 20;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
-
   ctx.fillStyle = '#FB923C';
   ctx.strokeStyle = '#EA580C';
   ctx.lineWidth = 2.5;
   roundRect(ctx, pauseBtnX - 25, topPadding + 10, 40, 35, 10);
   ctx.fill();
   ctx.stroke();
-
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 18px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif';
@@ -1022,19 +1097,9 @@ function renderCards() {
       }
       ctx.lineWidth = 2.5;
 
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-      ctx.shadowBlur = 8;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 3;
-
       roundRect(ctx, card.x, card.y, card.width, card.height, 12);
       ctx.fill();
       ctx.stroke();
-
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
 
       if (card.isCover) {
         ctx.globalAlpha = 0.7;
@@ -1059,11 +1124,6 @@ function renderSlot() {
   const slotWidth = totalSlotsWidth / 7 - 4;
   const slotHeight = 90;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
-  ctx.shadowBlur = 5;
-  ctx.shadowOffsetX = 1;
-  ctx.shadowOffsetY = 2;
-
   ctx.fillStyle = '#FFF7ED';
   ctx.strokeStyle = '#FDBA74';
   ctx.lineWidth = 2.5;
@@ -1074,11 +1134,6 @@ function renderSlot() {
     ctx.fill();
     ctx.stroke();
   }
-
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
   gameState.queue.forEach((card, i) => {
     const x = 20 + i * (slotWidth + 4);
@@ -1105,22 +1160,12 @@ function renderControls() {
   gameState.controlButtons = [];
 
   buttons.forEach(btn => {
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 3;
-
     ctx.fillStyle = btn.disabled ? '#D1D5DB' : '#FB923C';
     ctx.strokeStyle = btn.disabled ? '#9CA3AF' : '#EA580C';
     ctx.lineWidth = 2;
     roundRect(ctx, btn.x, btnY, btnWidth, 45, 12);
     ctx.fill();
     ctx.stroke();
-
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
 
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 13px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1139,22 +1184,12 @@ function renderPauseModal() {
   const modalX = canvas.width / 2 - 140;
   const modalY = canvas.height / 2 - 100;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-  ctx.shadowBlur = 15;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 5;
-
   ctx.fillStyle = '#FFFFFF';
   ctx.strokeStyle = '#FB923C';
   ctx.lineWidth = 3;
   roundRect(ctx, modalX, modalY, 280, 150, 18);
   ctx.fill();
   ctx.stroke();
-
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#44403C';
   ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1164,22 +1199,12 @@ function renderPauseModal() {
   const btn1X = canvas.width / 2 - 100;
   const btn1Y = modalY + 80;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-  ctx.shadowBlur = 8;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 3;
-
   ctx.fillStyle = '#FB923C';
   ctx.strokeStyle = '#EA580C';
   ctx.lineWidth = 2;
   roundRect(ctx, btn1X, btn1Y, 200, 45, 12);
   ctx.fill();
   ctx.stroke();
-
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 18px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1195,22 +1220,12 @@ function renderLoseModal() {
   const modalX = canvas.width / 2 - 140;
   const modalY = canvas.height / 2 - 140;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-  ctx.shadowBlur = 15;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 5;
-
   ctx.fillStyle = '#FFFFFF';
   ctx.strokeStyle = '#EF4444';
   ctx.lineWidth = 3;
   roundRect(ctx, modalX, modalY, 280, 280, 18);
   ctx.fill();
   ctx.stroke();
-
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#44403C';
   ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1226,22 +1241,12 @@ function renderLoseModal() {
     const shareBtnX = canvas.width / 2 - 100;
     const shareBtnY = modalY + 110;
 
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 3;
-
     ctx.fillStyle = '#FB923C';
     ctx.strokeStyle = '#EA580C';
     ctx.lineWidth = 2;
     roundRect(ctx, shareBtnX, shareBtnY, 200, 45, 12);
     ctx.fill();
     ctx.stroke();
-
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
 
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1252,22 +1257,12 @@ function renderLoseModal() {
     const homeBtnX = canvas.width / 2 - 100;
     const homeBtnY = modalY + 165;
 
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-
     ctx.fillStyle = '#FFFFFF';
     ctx.strokeStyle = '#FB923C';
     ctx.lineWidth = 2;
     roundRect(ctx, homeBtnX, homeBtnY, 200, 45, 12);
     ctx.fill();
     ctx.stroke();
-
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
 
     ctx.fillStyle = '#FB923C';
     ctx.font = 'bold 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1278,22 +1273,12 @@ function renderLoseModal() {
     const restartBtnX = canvas.width / 2 - 100;
     const restartBtnY = modalY + 110;
 
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 3;
-
     ctx.fillStyle = '#FB923C';
     ctx.strokeStyle = '#EA580C';
     ctx.lineWidth = 2;
     roundRect(ctx, restartBtnX, restartBtnY, 200, 45, 12);
     ctx.fill();
     ctx.stroke();
-
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
 
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1304,22 +1289,12 @@ function renderLoseModal() {
     const homeBtnX = canvas.width / 2 - 100;
     const homeBtnY = modalY + 165;
 
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-
     ctx.fillStyle = '#FFFFFF';
     ctx.strokeStyle = '#FB923C';
     ctx.lineWidth = 2;
     roundRect(ctx, homeBtnX, homeBtnY, 200, 45, 12);
     ctx.fill();
     ctx.stroke();
-
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
 
     ctx.fillStyle = '#FB923C';
     ctx.font = 'bold 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1336,22 +1311,12 @@ function renderWinModal() {
   const modalX = canvas.width / 2 - 140;
   const modalY = canvas.height / 2 - 150;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-  ctx.shadowBlur = 15;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 5;
-
   ctx.fillStyle = '#FFFFFF';
   ctx.strokeStyle = '#10B981';
   ctx.lineWidth = 3;
   roundRect(ctx, modalX, modalY, 280, 300, 18);
   ctx.fill();
   ctx.stroke();
-
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#44403C';
   ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1376,22 +1341,12 @@ function renderWinModal() {
   const nextBtnX = canvas.width / 2 - 100;
   const nextBtnY = modalY + 175;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-  ctx.shadowBlur = 8;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 3;
-
   ctx.fillStyle = '#10B981';
   ctx.strokeStyle = '#059669';
   ctx.lineWidth = 2;
   roundRect(ctx, nextBtnX, nextBtnY, 200, 45, 12);
   ctx.fill();
   ctx.stroke();
-
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1406,14 +1361,14 @@ function renderWinModal() {
   const homeBtnX = canvas.width / 2 - 100;
   const homeBtnY = modalY + 230;
   ctx.fillStyle = '#FFFFFF';
-  ctx.strokeStyle = '#FF9A3C';
+  ctx.strokeStyle = '#FB923C';
   ctx.lineWidth = 2;
   roundRect(ctx, homeBtnX, homeBtnY, 200, 45, 10);
   ctx.fill();
   ctx.stroke();
 
-  ctx.fillStyle = '#FF9A3C';
-  ctx.font = 'bold 16px Arial, sans-serif';
+  ctx.fillStyle = '#FB923C';
+  ctx.font = 'bold 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif';
   ctx.fillText('🏠 返回首页', canvas.width / 2, homeBtnY + 27);
 
   gameState.winHomeBtn = { x: homeBtnX, y: homeBtnY, width: 200, height: 45 };
@@ -1957,6 +1912,7 @@ function handleGameTabClick(x, y) {
   if (gameState.gamePaused && gameState.pauseContinueBtn) {
     if (x >= gameState.pauseContinueBtn.x && x <= gameState.pauseContinueBtn.x + gameState.pauseContinueBtn.width && y >= gameState.pauseContinueBtn.y && y <= gameState.pauseContinueBtn.y + gameState.pauseContinueBtn.height) {
       gameState.gamePaused = false;
+      resumeBgMusic();
       render();
       return;
     }
@@ -1992,6 +1948,7 @@ function handleGameTabClick(x, y) {
     if (gameState.loseHomeBtn && x >= gameState.loseHomeBtn.x && x <= gameState.loseHomeBtn.x + gameState.loseHomeBtn.width && y >= gameState.loseHomeBtn.y && y <= gameState.loseHomeBtn.y + gameState.loseHomeBtn.height) {
       gameState.showLoseModal = false;
       gameState.showStartScreen = true;
+      stopBgMusic();
       render();
       return;
     }
@@ -2011,6 +1968,7 @@ function handleGameTabClick(x, y) {
     if (gameState.winHomeBtn && x >= gameState.winHomeBtn.x && x <= gameState.winHomeBtn.x + gameState.winHomeBtn.width && y >= gameState.winHomeBtn.y && y <= gameState.winHomeBtn.y + gameState.winHomeBtn.height) {
       gameState.showWinModal = false;
       gameState.showStartScreen = true;
+      stopBgMusic();
       render();
       return;
     }
@@ -2019,6 +1977,11 @@ function handleGameTabClick(x, y) {
 
   if (gameState.pauseBtn && x >= gameState.pauseBtn.x && x <= gameState.pauseBtn.x + gameState.pauseBtn.width && y >= gameState.pauseBtn.y && y <= gameState.pauseBtn.y + gameState.pauseBtn.height) {
     gameState.gamePaused = !gameState.gamePaused;
+    if (gameState.gamePaused) {
+      pauseBgMusic();
+    } else {
+      resumeBgMusic();
+    }
     render();
     return;
   }
