@@ -13,26 +13,31 @@ function playSound(type) {
   if (!settings.soundEnabled) return;
   
   try {
-    if (soundEffects[type]) {
-      soundEffects[type].stop();
-    }
-    const sound = wx.createInnerAudioContext();
-    sound.src = `https://cdn.jsdelivr.net/gh/fengfanM/doggo-game-assets@main/sounds/${type}.mp3`;
-    sound.loop = false;
-    sound.volume = 0.7;
-    sound.play();
-    soundEffects[type] = sound;
-    
-    sound.onEnded(() => {
-      sound.destroy();
-      if (soundEffects[type] === sound) {
-        delete soundEffects[type];
+    setTimeout(() => {
+      try {
+        const sound = wx.createInnerAudioContext();
+        sound.src = `https://cdn.jsdelivr.net/gh/fengfanM/doggo-game-assets@main/sounds/${type}.mp3`;
+        sound.loop = false;
+        sound.volume = 0.4;
+        
+        sound.onCanplay(() => {
+          try {
+            sound.play();
+          } catch (e) {
+            sound.destroy();
+          }
+        });
+        
+        sound.onEnded(() => {
+          sound.destroy();
+        });
+        sound.onError((err) => {
+          sound.destroy();
+        });
+      } catch (e) {
+        console.log('Failed to play sound:', e);
       }
-    });
-    sound.onError((err) => {
-      console.log('Sound error:', err);
-      sound.destroy();
-    });
+    }, 0);
   } catch (e) {
     console.log('Failed to play sound:', e);
   }
@@ -43,23 +48,35 @@ function playBgMusic() {
   if (!settings.musicEnabled) return;
   
   try {
-    if (bgMusic) {
-      bgMusic.stop();
-      bgMusic.destroy();
-    }
-    bgMusic = wx.createInnerAudioContext();
-    bgMusic.src = 'https://cdn.jsdelivr.net/gh/fengfanM/doggo-game-assets@main/sounds/bgm.mp3';
-    bgMusic.loop = true;
-    bgMusic.volume = 0.3;
-    bgMusic.play();
-    
-    bgMusic.onError((err) => {
-      console.log('BGM error:', err);
-      bgMusic = null;
-    });
+    setTimeout(() => {
+      try {
+        if (bgMusic) {
+          bgMusic.stop();
+          bgMusic.destroy();
+        }
+        bgMusic = wx.createInnerAudioContext();
+        bgMusic.src = 'https://cdn.jsdelivr.net/gh/fengfanM/doggo-game-assets@main/sounds/bgm.mp3';
+        bgMusic.loop = true;
+        bgMusic.volume = 0.15;
+        
+        bgMusic.onCanplay(() => {
+          try {
+            bgMusic.play();
+          } catch (e) {
+            bgMusic = null;
+          }
+        });
+        
+        bgMusic.onError((err) => {
+          bgMusic = null;
+        });
+      } catch (e) {
+        console.log('Failed to play bgm:', e);
+        bgMusic = null;
+      }
+    }, 0);
   } catch (e) {
     console.log('Failed to play bgm:', e);
-    bgMusic = null;
   }
 }
 
