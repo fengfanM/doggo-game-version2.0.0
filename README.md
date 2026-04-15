@@ -1,6 +1,6 @@
 <p align="center">
   <br>
-  <img src="./狗了个狗游戏介绍.png" alt="Logo" width="600">
+  <img src="./狗了个狗游戏介绍.png" alt="Logo" width="400">
   <br>
 </p>
 
